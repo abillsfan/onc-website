@@ -100,6 +100,18 @@ var ONC_LINKS = {
       .catch(function () { /* leave section hidden */ });
   }
 
+  // Release calendar: hide releases whose date has passed (Central time), then empty weeks
+  var rcItems = document.querySelectorAll("[data-release-date]");
+  if (rcItems.length) {
+    var todayCT;
+    try { todayCT = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); }
+    catch (e) { todayCT = new Date().toISOString().slice(0, 10); }
+    rcItems.forEach(function (el) { if (el.getAttribute("data-release-date") < todayCT) el.hidden = true; });
+    document.querySelectorAll(".rc-week").forEach(function (w) {
+      if (!w.querySelector("li[data-release-date]:not([hidden])")) w.hidden = true;
+    });
+  }
+
   // Footer year
   var y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();

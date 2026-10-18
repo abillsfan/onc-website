@@ -336,3 +336,38 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 .prose a.btn-whatnot,.cta-box a.btn-whatnot{color:#000}
 .hit-week{text-align:center}
 .hit-week .hits-grid,.hit-card{text-align:left}
+
+/* ---------- Whatnot trust badge ---------- */
+.trust-badge{display:inline-flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 8px;margin:4px auto 14px;padding:8px 16px;border:1px solid var(--line);border-radius:999px;background:rgba(13,20,40,.7);color:var(--white);text-decoration:none;font-size:14px;font-weight:600}
+.trust-badge:hover{border-color:var(--blue-hi)}
+.trust-badge .stars{color:var(--wn-yellow);letter-spacing:1px}
+.trust-badge .dot{color:var(--muted)}
+
+/* ---------- product library ---------- */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,320px));justify-content:center;gap:22px}
+.product-card{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;text-decoration:none;color:var(--white);transition:transform .2s,border-color .2s}
+.product-card:hover{transform:translateY(-4px);border-color:var(--blue-hi)}
+.product-card img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:#eef0f5}
+.product-body{padding:16px 18px 20px}
+.product-body h2{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:24px;margin:0 0 6px}
+.product-body p{margin:0;color:var(--wn-yellow);font-weight:700;font-size:14px}
+.product-body p.muted,.muted{color:var(--muted);font-weight:400}
+
+/* ---------- release calendar ---------- */
+.rc-disclaimer{padding:14px 18px;border-left:4px solid var(--wn-yellow);background:rgba(255,230,0,.06);border-radius:8px}
+.rc-week h2{margin-top:36px}
+.rc-list{list-style:none;padding:0;margin:0;border-top:1px solid var(--line)}
+.rc-list li{display:grid;grid-template-columns:96px 1fr auto;gap:4px 16px;align-items:baseline;padding:12px 4px;border-bottom:1px solid var(--line)}
+.rc-list time{font-weight:800;color:var(--blue-hi);white-space:nowrap}
+.rc-name{font-weight:700;color:var(--white)}
+.rc-tags{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+.rc-tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:6px;background:rgba(61,123,255,.18);color:#cfe0ff}
+.rc-tag.brand{background:rgba(255,230,0,.12);color:#fff3a0}
+.rc-note{grid-column:2/4;font-size:13px;color:var(--muted)}
+@media (max-width:620px){
+  .rc-list li{grid-template-columns:72px 1fr}
+  .rc-tags{grid-column:2;justify-content:flex-start}
+  .rc-note{grid-column:2}
+  .trust-badge{font-size:13px;border-radius:14px}
+}
+.section-sub a{color:var(--blue-hi);font-weight:600}

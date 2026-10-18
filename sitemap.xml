@@ -2,6 +2,8 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://on-cards.com/</loc><lastmod>2026-10-18</lastmod><priority>1.0</priority></url>
   <url><loc>https://on-cards.com/hits/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
+  <url><loc>https://on-cards.com/what-we-break/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
+  <url><loc>https://on-cards.com/release-calendar/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
   <url><loc>https://on-cards.com/card-breaks/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
   <url><loc>https://on-cards.com/team-breaks/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
   <url><loc>https://on-cards.com/random-breaks/</loc><lastmod>2026-10-18</lastmod><priority>0.8</priority></url>
