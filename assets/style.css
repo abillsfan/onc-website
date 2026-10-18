@@ -111,11 +111,11 @@ section{position:relative}
 .section-sub{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 40px}
 
 /* electric divider between sections */
-.ondeck,.pillars,.breaks,.join,.facebook,.trust,.faq,.final{padding:90px 0}
+.ondeck,.pillars,.breaks,.join,.facebook,.faq,.final{padding:90px 0}
 .breaks,.facebook,.final{background:
   linear-gradient(180deg,transparent,rgba(29,77,255,.07) 40%,transparent),
   var(--ink)}
-.breaks::before,.facebook::before,.final::before,.trust::before{
+.breaks::before,.facebook::before,.final::before{
   content:"";position:absolute;top:0;left:0;right:0;height:2px;
   background:linear-gradient(90deg,transparent,var(--blue-hi),transparent);box-shadow:0 0 18px var(--blue-glow)
 }
@@ -167,12 +167,6 @@ section{position:relative}
   border-left:4px solid var(--blue-hi);border-bottom:4px solid var(--blue-hi);transform:rotate(-45deg)
 }
 
-/* ---------- trust ---------- */
-.trust{padding:70px 0}
-.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;text-align:center}
-.trust-item h3{font-family:var(--brush);font-weight:400;text-transform:uppercase;color:var(--blue-hi);font-size:26px;margin:0 0 6px}
-.trust-item p{color:var(--muted);margin:0}
-
 /* ---------- FAQ ---------- */
 .faq .section-title{margin-bottom:40px}
 details{border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:12px;overflow:hidden}
@@ -209,7 +203,7 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 
 /* ---------- responsive ---------- */
 @media (max-width:980px){
-  .pillar-grid,.break-grid,.trust-grid{grid-template-columns:1fr 1fr}
+  .pillar-grid,.break-grid{grid-template-columns:1fr 1fr}
   .steps{grid-template-columns:1fr 1fr}
   .fb-inner{grid-template-columns:1fr;gap:36px}
   .fb-poster{max-width:380px;margin:0 auto}
@@ -232,7 +226,7 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 }
 @media (max-width:620px){
   body{font-size:16px}
-  .pillar-grid,.break-grid,.trust-grid,.steps{grid-template-columns:1fr}
+  .pillar-grid,.break-grid,.steps{grid-template-columns:1fr}
   .pillars,.breaks,.join,.facebook,.faq,.final{padding:64px 0}
   .btn-lg{font-size:18px;width:100%}
   .btn-row{flex-direction:column}
@@ -243,3 +237,4 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 /* ---------- on deck (weekly) ---------- */
 .ondeck{position:relative}
 .ondeck .break-card a{color:var(--blue-hi);font-weight:600}
+.ondeck .break-card[hidden]{display:none}

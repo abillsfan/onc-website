@@ -12,6 +12,16 @@ var ONC_LINKS = {
   document.querySelectorAll(".js-whatnot").forEach(function (a) { a.href = ONC_LINKS.whatnot; });
   document.querySelectorAll(".js-facebook").forEach(function (a) { a.href = ONC_LINKS.facebook; });
 
+  // On Deck: show the lineup card until its show is over, then "stay tuned"
+  var lineup = document.querySelector(".ondeck-lineup");
+  var tbd = document.querySelector(".ondeck-tbd");
+  if (lineup && tbd) {
+    var until = Date.parse(lineup.getAttribute("data-until") || "");
+    var showLineup = !isNaN(until) && Date.now() < until;
+    lineup.hidden = !showLineup;
+    tbd.hidden = showLineup;
+  }
+
   // Footer year
   var y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();
@@ -41,7 +51,7 @@ var ONC_LINKS = {
         if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
       });
     }, { threshold: 0.12 });
-    document.querySelectorAll(".pillar, .break-card, .steps li, .trust-item, .fb-poster, .fb-copy")
+    document.querySelectorAll(".pillar, .break-card, .steps li, .fb-poster, .fb-copy")
       .forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
   }
 })();
