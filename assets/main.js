@@ -112,12 +112,13 @@ var ONC_LINKS = {
     });
   }
 
-  // Score ticker: today's NFL, college football and MLB games (ESPN public scoreboard feed).
+  // Score ticker: today's NFL, college football, MLB, NBA and college basketball games (ESPN public scoreboard feed).
   // Hides itself when there are no games today or the feed is unavailable.
   (function () {
     var header = document.querySelector(".nav");
     if (!header || !window.fetch || !window.Promise) return;
-    var leagues = [["NFL", "football/nfl"], ["NCAAF", "football/college-football"], ["MLB", "baseball/mlb"]];
+    var leagues = [["NFL", "football/nfl"], ["NCAAF", "football/college-football"], ["MLB", "baseball/mlb"],
+                   ["NBA", "basketball/nba"], ["NCAAB", "basketball/mens-college-basketball"]];
     var tz = "America/Chicago";
     var dayCT = function (d) {
       try { return d.toLocaleDateString("en-CA", { timeZone: tz }); } catch (e) { return d.toISOString().slice(0, 10); }

@@ -399,3 +399,15 @@ html{scroll-padding-top:120px}
   .ticker-track{animation:none}
   .tk-group[aria-hidden]{display:none}
 }
+
+/* ---------- buyer reviews ---------- */
+.reviews{padding:90px 0;background:linear-gradient(180deg,transparent,rgba(29,77,255,.06) 40%,transparent),var(--ink)}
+.reviews::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue-hi),transparent);box-shadow:0 0 18px var(--blue-glow)}
+.review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px}
+.review-card{margin:0;padding:24px 22px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;gap:12px}
+.review-card .stars{color:var(--wn-yellow);letter-spacing:2px;font-size:18px}
+.review-card blockquote{margin:0;font-size:16px;line-height:1.55;color:#e3e8fb;flex:1}
+.review-card blockquote::before{content:"“"}
+.review-card blockquote::after{content:"”"}
+.review-card figcaption{font-size:13px;color:var(--muted)}
+@media (max-width:620px){.reviews{padding:64px 0}}
