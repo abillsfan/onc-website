@@ -22,6 +22,12 @@ var ONC_LINKS = {
     tbd.hidden = showLineup;
   }
 
+  var cacheGet = function (k, maxAgeMs) {
+    try { var v = JSON.parse(localStorage.getItem(k) || "null"); if (v && Date.now() - v.t < maxAgeMs) return v.d; } catch (e) {}
+    return null;
+  };
+  var cacheSet = function (k, d) { try { localStorage.setItem(k, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} };
+
   // Live on eBay: cards from data/ebay-listings.json, with countdowns; ended auctions drop off
   var ebaySec = document.getElementById("ebay");
   var ebayGrid = document.getElementById("ebay-grid");
@@ -56,9 +62,7 @@ var ONC_LINKS = {
       });
       ebaySec.hidden = live === 0;
     };
-    fetch("data/ebay-listings.json?t=" + Math.floor(Date.now() / 600000))
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
+    var drawEbay = function (data) {
         var items = (data.items || []).slice().sort(function (a, b) { return Date.parse(a.ends) - Date.parse(b.ends); });
         items.forEach(function (it) {
           var end = new Date(it.ends);
@@ -95,9 +99,19 @@ var ONC_LINKS = {
           if (!isNaN(u)) up.textContent = "Bids shown as of " + u.toLocaleString("en-US", { timeZone: tz, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " CT. Live bids on eBay.";
         }
         tick();
-        setInterval(tick, 30000);
+    };
+    var ebayCached = cacheGet("onc-ebay", 6 * 3600e3);
+    if (ebayCached) drawEbay(ebayCached);
+    fetch("data/ebay-listings.json?t=" + Math.floor(Date.now() / 600000))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        cacheSet("onc-ebay", data);
+        if (!ebayCached || JSON.stringify(ebayCached) !== JSON.stringify(data)) {
+          ebayGrid.textContent = ""; cards = []; drawEbay(data);
+        }
       })
-      .catch(function () { /* leave section hidden */ });
+      .catch(function () { /* keep whatever is shown */ });
+    setInterval(tick, 30000);
   }
 
   // Release calendar: hide releases whose date has passed (Central time), then empty weeks
@@ -187,13 +201,15 @@ var ONC_LINKS = {
       clearTimeout(timer);
       timer = setTimeout(load, live ? 60000 : 600000);
     };
+    var tkCached = cacheGet("onc-scores", 10 * 60e3);
+    if (tkCached) { try { render(tkCached); clearTimeout(timer); } catch (e) {} }
     var load = function () {
       Promise.all(leagues.map(function (l) {
         return fetch("https://site.api.espn.com/apis/site/v2/sports/" + l[1] + "/scoreboard")
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (j) { return [l[0], j]; })
           .catch(function () { return [l[0], null]; });
-      })).then(render);
+      })).then(function (res) { cacheSet("onc-scores", res); render(res); });
     };
     load();
   })();
@@ -228,6 +244,10 @@ var ONC_LINKS = {
       });
     }, { threshold: 0.12 });
     document.querySelectorAll(".pillar, .break-card, .steps li, .fb-poster, .fb-copy")
-      .forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+      .forEach(function (el) {
+        var r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) return;   // already on screen: show right away
+        el.classList.add("reveal"); io.observe(el);
+      });
   }
 })();
