@@ -112,6 +112,91 @@ var ONC_LINKS = {
     });
   }
 
+  // Score ticker: today's NFL, college football and MLB games (ESPN public scoreboard feed).
+  // Hides itself when there are no games today or the feed is unavailable.
+  (function () {
+    var header = document.querySelector(".nav");
+    if (!header || !window.fetch || !window.Promise) return;
+    var leagues = [["NFL", "football/nfl"], ["NCAAF", "football/college-football"], ["MLB", "baseball/mlb"]];
+    var tz = "America/Chicago";
+    var dayCT = function (d) {
+      try { return d.toLocaleDateString("en-CA", { timeZone: tz }); } catch (e) { return d.toISOString().slice(0, 10); }
+    };
+    var bar = document.createElement("div");
+    bar.className = "ticker"; bar.hidden = true;
+    bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Today's scores");
+    var track = document.createElement("div"); track.className = "ticker-track";
+    bar.appendChild(track); header.appendChild(bar);
+    var timer = null;
+    var txt = function (tag, cls, t) { var n = document.createElement(tag); if (cls) n.className = cls; n.textContent = t; return n; };
+    var team = function (c, showScore) {
+      var w = document.createElement("span");
+      w.className = "tk-team" + (c.winner ? " win" : "");
+      var rank = c.curatedRank && c.curatedRank.current && c.curatedRank.current <= 25 ? "#" + c.curatedRank.current + " " : "";
+      w.appendChild(txt("span", "tk-abbr", rank + ((c.team && c.team.abbreviation) || "")));
+      if (showScore) w.appendChild(txt("span", "tk-score", c.score != null ? String(c.score) : ""));
+      return w;
+    };
+    var render = function (results) {
+      var today = dayCT(new Date()), items = [], live = false;
+      results.forEach(function (r) {
+        if (!r[1] || !r[1].events) return;
+        r[1].events.forEach(function (ev) {
+          var st = ev.status && ev.status.type ? ev.status.type : {};
+          var isToday = dayCT(new Date(ev.date)) === today;
+          if (!isToday && st.state !== "in") return;
+          var comp = ev.competitions && ev.competitions[0];
+          if (!comp || !comp.competitors || comp.competitors.length < 2) return;
+          var away = comp.competitors.filter(function (c) { return c.homeAway === "away"; })[0] || comp.competitors[1];
+          var home = comp.competitors.filter(function (c) { return c.homeAway === "home"; })[0] || comp.competitors[0];
+          var started = st.state === "in" || st.state === "post";
+          var it = document.createElement("span");
+          it.className = "tk-item" + (st.state === "in" ? " live" : "");
+          it.appendChild(txt("span", "tk-league", r[0]));
+          it.appendChild(team(away, started));
+          it.appendChild(txt("span", "tk-at", started ? "" : "@"));
+          it.appendChild(team(home, started));
+          var status;
+          if (st.state === "in") { status = st.shortDetail || "Live"; live = true; }
+          else if (st.state === "post") { status = st.shortDetail || "Final"; }
+          else {
+            try { status = new Date(ev.date).toLocaleTimeString("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" }) + " CT"; }
+            catch (e) { status = st.shortDetail || ""; }
+          }
+          it.appendChild(txt("span", "tk-status", status));
+          items.push({ node: it, order: st.state === "in" ? 0 : st.state === "pre" ? 1 : 2, t: Date.parse(ev.date) || 0 });
+        });
+      });
+      items.sort(function (a, b) { return a.order - b.order || a.t - b.t; });
+      track.textContent = "";
+      if (!items.length) { bar.hidden = true; }
+      else {
+        var src = txt("a", "tk-src", "Scores: ESPN");
+        src.href = "https://www.espn.com/"; src.target = "_blank"; src.rel = "noopener";
+        [0, 1].forEach(function (copy) {            // two copies for a seamless loop
+          var g = document.createElement("span"); g.className = "tk-group";
+          if (copy) g.setAttribute("aria-hidden", "true");
+          items.forEach(function (i) { g.appendChild(copy ? i.node.cloneNode(true) : i.node); });
+          g.appendChild(copy ? src.cloneNode(true) : src);
+          track.appendChild(g);
+        });
+        bar.hidden = false;
+        track.style.animationDuration = Math.max(25, items.length * 5) + "s";
+      }
+      clearTimeout(timer);
+      timer = setTimeout(load, live ? 60000 : 600000);
+    };
+    var load = function () {
+      Promise.all(leagues.map(function (l) {
+        return fetch("https://site.api.espn.com/apis/site/v2/sports/" + l[1] + "/scoreboard")
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (j) { return [l[0], j]; })
+          .catch(function () { return [l[0], null]; });
+      })).then(render);
+    };
+    load();
+  })();
+
   // Footer year
   var y = document.getElementById("year");
   if (y) y.textContent = new Date().getFullYear();

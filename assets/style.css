@@ -371,3 +371,31 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
   .trust-badge{font-size:13px;border-radius:14px}
 }
 .section-sub a{color:var(--blue-hi);font-weight:600}
+
+/* ---------- score ticker ---------- */
+html{scroll-padding-top:120px}
+.ticker{height:34px;overflow:hidden;border-top:1px solid var(--line);background:#020308;font-size:13px;line-height:34px;position:relative}
+.ticker::before,.ticker::after{content:"";position:absolute;top:0;bottom:0;width:28px;z-index:1;pointer-events:none}
+.ticker::before{left:0;background:linear-gradient(90deg,#020308,transparent)}
+.ticker::after{right:0;background:linear-gradient(-90deg,#020308,transparent)}
+.ticker-track{display:inline-flex;white-space:nowrap;animation:tk-scroll 60s linear infinite;will-change:transform}
+.ticker:hover .ticker-track{animation-play-state:paused}
+.tk-group{display:inline-flex;align-items:center;gap:26px;padding-right:26px}
+.tk-item{display:inline-flex;align-items:center;gap:7px;color:var(--white)}
+.tk-league{font-size:11px;font-weight:800;letter-spacing:.06em;color:#000;background:var(--wn-yellow);border-radius:4px;padding:1px 6px;line-height:16px}
+.tk-team{display:inline-flex;gap:5px;color:#cfd6ee}
+.tk-team.win{color:#fff;font-weight:800}
+.tk-abbr{font-weight:700}
+.tk-score{font-variant-numeric:tabular-nums}
+.tk-at{color:var(--muted)}
+.tk-status{color:var(--muted);font-size:12px}
+.tk-item.live .tk-status{color:#ff6b6b;font-weight:700}
+.tk-item.live .tk-status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#ff2b2b;margin-right:5px;vertical-align:middle;animation:pulse 1.6s infinite}
+.tk-src{color:var(--muted);font-size:11px;text-decoration:none}
+.tk-src:hover{color:var(--blue-hi)}
+@keyframes tk-scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){
+  .ticker{overflow-x:auto}
+  .ticker-track{animation:none}
+  .tk-group[aria-hidden]{display:none}
+}
