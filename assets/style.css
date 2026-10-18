@@ -272,3 +272,67 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 @media (min-width:821px) and (max-width:940px){
   .brand span{display:none}
 }
+
+/* ---------- sub pages ---------- */
+.page-hero{padding:56px 0 10px;background:radial-gradient(60% 80% at 50% 0%,rgba(29,77,255,.22),transparent 70%),var(--black)}
+.crumbs{font-size:13px;color:var(--muted);margin-bottom:18px}
+.crumbs a{color:var(--muted);text-decoration:none}
+.crumbs a:hover{color:var(--blue-hi)}
+.crumbs span{margin:0 4px}
+.crumbs [aria-current]{color:var(--white)}
+.page-title{font-family:var(--display);text-transform:uppercase;font-style:italic;font-size:clamp(38px,6vw,64px);line-height:1;margin:0 0 16px;font-weight:400}
+.page-title span{color:var(--blue-hi);text-shadow:0 0 24px var(--blue-glow)}
+.page-lede{font-size:clamp(17px,2vw,20px);color:var(--muted);margin:0 0 10px;max-width:720px}
+.page-body{padding:40px 0 90px}
+.prose h2{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:clamp(26px,3.4vw,34px);margin:44px 0 12px;letter-spacing:.01em}
+.prose p,.prose li,.prose dd{color:#d4daf0}
+.prose a{color:var(--blue-hi);font-weight:600}
+.prose .checks li{color:var(--white)}
+.prose details{margin-bottom:10px}
+.break-grid.two{grid-template-columns:1fr 1fr;margin-top:18px}
+.break-card h3 a{color:inherit;text-decoration:none}
+.break-card h3 a:hover{color:var(--blue-hi)}
+.terms{display:grid;grid-template-columns:max-content 1fr;gap:10px 22px;margin:0}
+.terms dt{font-weight:800;color:var(--white)}
+.terms dd{margin:0}
+.plain-steps{padding-left:22px}
+.plain-steps li{margin:8px 0}
+.source-note{font-size:13px;color:var(--muted)!important}
+.cta-box{margin:56px 0 0;padding:34px 28px;border:1px solid var(--line);border-radius:var(--radius);text-align:center;background:linear-gradient(160deg,rgba(29,77,255,.16),rgba(13,20,40,.7))}
+.cta-box h2{margin:0 0 8px;font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:clamp(26px,3.4vw,34px)}
+.cta-box p{color:var(--muted);max-width:560px;margin:0 auto}
+.more-link{display:inline-block;margin-top:10px;font-weight:700;color:var(--blue-hi);text-decoration:none}
+.break-card.highlight .more-link{color:#fff}
+.more-link:hover{text-decoration:underline}
+
+/* ---------- hits ---------- */
+.latest-hits{padding:90px 0}
+.hit-week{margin:10px 0 50px}
+.hit-week h2{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:clamp(26px,3.4vw,34px);margin:0 0 4px}
+.hit-week-sub{color:var(--muted);margin:0 0 22px}
+.hit-week-sub a{color:var(--blue-hi);font-weight:600}
+.hits-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,300px));justify-content:center;gap:22px}
+.hit-card{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.hit-card:hover{transform:translateY(-4px);border-color:var(--blue-hi);box-shadow:0 14px 40px rgba(29,77,255,.25)}
+.hit-card img{width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;background:#eef0f5}
+.hit-card figcaption{padding:14px 16px 18px}
+.hit-card h2,.hit-card h3{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:24px;margin:0 0 4px;letter-spacing:.02em}
+.hit-card-desc{margin:0;font-weight:700;color:var(--wn-yellow)}
+.hit-card-meta{margin:4px 0 0;font-size:14px;color:var(--muted)}
+
+/* ---------- footer links ---------- */
+.footer-links{flex-basis:100%;order:3;font-size:14px;line-height:1.9}
+.footer-links a{color:var(--muted);text-decoration:none}
+.footer-links a:hover{color:var(--blue-hi)}
+@media (max-width:620px){
+  .break-grid.two{grid-template-columns:1fr}
+  .terms{grid-template-columns:1fr;gap:2px}
+  .terms dd{margin-bottom:10px}
+  .hits-grid{grid-template-columns:1fr 1fr;gap:14px}
+  .hit-card h2,.hit-card h3{font-size:19px}
+  .latest-hits{padding:64px 0}
+}
+.prose a.btn,.cta-box a.btn{color:#fff;font-weight:400}
+.prose a.btn-whatnot,.cta-box a.btn-whatnot{color:#000}
+.hit-week{text-align:center}
+.hit-week .hits-grid,.hit-card{text-align:left}

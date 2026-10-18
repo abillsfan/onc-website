@@ -15,10 +15,12 @@ jobs:
         run: sleep 120
       - name: Check the key file is live
         run: curl -fsS "https://on-cards.com/d214203cfca3f78ee94fc7a8aeb7f734.txt" | grep -q "d214203cfca3f78ee94fc7a8aeb7f734"
-      - name: Ping IndexNow
+      - name: Ping IndexNow with every page in the sitemap
         run: |
+          urls=$(curl -fsS "https://on-cards.com/sitemap.xml" | grep -o '<loc>[^<]*</loc>' | sed 's#</\?loc>##g' | python3 -c "import sys,json;print(json.dumps([l.strip() for l in sys.stdin if l.strip()]))")
+          echo "URLs: $urls"
+          body=$(printf '{"host":"on-cards.com","key":"d214203cfca3f78ee94fc7a8aeb7f734","keyLocation":"https://on-cards.com/d214203cfca3f78ee94fc7a8aeb7f734.txt","urlList":%s}' "$urls")
           code=$(curl -sS -o resp.txt -w "%{http_code}" -X POST "https://api.indexnow.org/indexnow" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            -d '{"host":"on-cards.com","key":"d214203cfca3f78ee94fc7a8aeb7f734","keyLocation":"https://on-cards.com/d214203cfca3f78ee94fc7a8aeb7f734.txt","urlList":["https://on-cards.com/"]}')
+            -H "Content-Type: application/json; charset=utf-8" -d "$body")
           echo "IndexNow responded $code"; cat resp.txt || true
           if [ "$code" != "200" ] && [ "$code" != "202" ]; then exit 1; fi
