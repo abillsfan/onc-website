@@ -238,3 +238,25 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 .ondeck{position:relative}
 .ondeck .break-card a{color:var(--blue-hi);font-weight:600}
 .ondeck .break-card[hidden]{display:none}
+
+/* ---------- live on eBay ---------- */
+.ebay{padding:90px 0;background:linear-gradient(180deg,transparent,rgba(29,77,255,.07) 40%,transparent),var(--ink)}
+.ebay::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue-hi),transparent);box-shadow:0 0 18px var(--blue-glow)}
+.ebay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,290px));justify-content:center;gap:22px}
+.ebay-card{display:flex;flex-direction:column;text-decoration:none;color:var(--white);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;transition:transform .2s,border-color .2s,box-shadow .2s}
+.ebay-card:hover,.ebay-card:focus-visible{transform:translateY(-4px);border-color:var(--blue-hi);box-shadow:0 14px 40px rgba(29,77,255,.25);outline:none}
+.ebay-img{aspect-ratio:4/5;background:#f3f4f8;display:grid;place-items:center;overflow:hidden}
+.ebay-img img{width:100%;height:100%;object-fit:contain}
+.ebay-body{padding:18px 18px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ebay-body h3{font-family:var(--body);font-weight:700;font-size:16px;line-height:1.35;margin:0;text-transform:none}
+.ebay-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:auto}
+.ebay-price .lbl{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.06em}
+.ebay-price strong{font-family:var(--display);font-size:26px;letter-spacing:.02em;color:var(--white)}
+.ebay-price .bids{color:var(--muted);font-size:13px}
+.ebay-bin{font-size:14px;font-weight:700;color:var(--wn-yellow)}
+.ebay-ends{font-size:14px;color:var(--muted)}
+.ebay-ends strong{color:var(--blue-hi)}
+.ebay-card.ending .ebay-ends strong{color:#ff5b5b}
+.ebay-card .btn{align-self:flex-start;margin-top:6px}
+.ebay-updated{text-align:center;color:var(--muted);font-size:13px;margin:18px 0 0}
+@media (max-width:620px){.ebay{padding:64px 0}.ebay-grid{grid-template-columns:1fr 1fr;justify-content:stretch;gap:14px}.ebay-body{padding:12px}.ebay-body h3{font-size:14px}.ebay-price strong{font-size:20px}.ebay-card .btn{font-size:13px;padding:.4em .8em}}

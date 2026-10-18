@@ -23,7 +23,7 @@
   <link rel="apple-touch-icon" href="images/icon-180.png">
   <link rel="preload" href="assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/style.css?v=20261018">
+  <link rel="stylesheet" href="assets/style.css?v=20261018b">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"Outta Nowhere Cards","alternateName":"ONC",
    "url":"https://on-cards.com/","logo":"https://on-cards.com/images/logo.png",
@@ -47,6 +47,7 @@
       <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       <nav class="nav-links" aria-label="Main">
         <a href="#ondeck">On Deck</a>
+        <a href="#ebay">eBay</a>
         <a href="#shows">The Shows</a>
         <a href="#breaks">Breaks</a>
         <a href="#join">How to Join</a>
@@ -115,9 +116,24 @@
           </article>
           <article class="break-card">
             <h3>Buy on eBay too</h3>
-            <p>Can't make a show? ONC singles are also listed on eBay. <a href="https://www.ebay.com/usr/cwright181" target="_blank" rel="noopener">See current listings</a>.</p>
+            <p>Can't make a show? ONC singles are also listed on eBay. <a href="#ebay">See what's up for bid</a>.</p>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== LIVE ON EBAY ===================== -->
+    <!-- Cards come from data/ebay-listings.json (synced from eBay). Ended auctions hide themselves;
+         the whole section hides when nothing is live. -->
+    <section class="ebay" id="ebay" hidden>
+      <div class="wrap">
+        <h2 class="section-title"><span>Live on</span> eBay</h2>
+        <p class="section-sub">Singles up for auction right now. Tap a card to see it and bid on eBay.</p>
+        <div class="ebay-grid" id="ebay-grid"></div>
+        <div class="btn-row center">
+          <a class="btn btn-blue btn-lg" href="https://www.ebay.com/sch/i.html?_ssn=cwright181" target="_blank" rel="noopener"><span>See all ONC listings on eBay</span></a>
+        </div>
+        <p class="ebay-updated" id="ebay-updated"></p>
       </div>
     </section>
 
@@ -297,6 +313,6 @@
     </div>
   </footer>
 
-  <script src="assets/main.js?v=20261018"></script>
+  <script src="assets/main.js?v=20261018b"></script>
 </body>
 </html>
