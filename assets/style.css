@@ -260,3 +260,15 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 .ebay-card .btn{align-self:flex-start;margin-top:6px}
 .ebay-updated{text-align:center;color:var(--muted);font-size:13px;margin:18px 0 0}
 @media (max-width:620px){.ebay{padding:64px 0}.ebay-grid{grid-template-columns:1fr 1fr;justify-content:stretch;gap:14px}.ebay-body{padding:12px}.ebay-body h3{font-size:14px}.ebay-price strong{font-size:20px}.ebay-card .btn{font-size:13px;padding:.4em .8em}}
+
+/* ---------- nav fit (8 items) ---------- */
+.nav-links a{white-space:nowrap}
+@media (min-width:821px) and (max-width:1200px){
+  .nav-links{gap:16px}
+  .nav-links a:not(.btn){font-size:13px;letter-spacing:.05em}
+  .brand span{font-size:18px}
+  .brand img{width:46px;height:46px}
+}
+@media (min-width:821px) and (max-width:940px){
+  .brand span{display:none}
+}
