@@ -397,11 +397,13 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 .rc-rel{grid-column:2/4;font-size:14px;color:var(--muted)}
 .rc-rel[hidden]{display:none}
 .rc-rel strong{color:var(--white)}
+.rc-sold{grid-column:2/4;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:#ff6b6b}
 @media (max-width:620px){
   .rc-list li{grid-template-columns:72px 1fr}
   .rc-tags{grid-column:2;justify-content:flex-start}
   .rc-note{grid-column:2}
   .rc-rel{grid-column:2}
+  .rc-sold{grid-column:2}
   .trust-badge{font-size:13px;border-radius:14px}
 }
 .section-sub a{color:var(--blue-hi);font-weight:600}
