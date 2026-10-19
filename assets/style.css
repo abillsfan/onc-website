@@ -241,11 +241,28 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 
 /* ---------- preordered for future breaks ---------- */
 .preorders{position:relative;padding:80px 0}
-.preorders .break-grid{grid-template-columns:repeat(2,1fr);max-width:900px;margin:0 auto}
+.po-product{position:relative;max-width:1000px;margin:0 auto 34px;padding:34px 32px 30px;border:1px solid var(--line);border-left:5px solid var(--blue);border-radius:var(--radius);background:var(--panel)}
+.po-head h3{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:34px;letter-spacing:.02em;margin:0 0 10px}
+.po-head p{color:var(--muted);margin:0;max-width:760px}
+.po-head p strong{color:#fff}
+.po-cols{display:grid;grid-template-columns:1fr 1.4fr;gap:28px;margin:26px 0 6px}
+.po-cols h4{margin:0 0 10px;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue-hi)}
+.po-cols h4:not(:first-child){margin-top:20px}
+.po-small{color:var(--muted);margin:0}
+.po-list{list-style:none;padding:0;margin:0;display:grid;gap:7px}
+.po-list li{position:relative;padding-left:18px;color:var(--muted)}
+.po-list li::before{content:"";position:absolute;left:0;top:.6em;width:7px;height:7px;border-radius:50%;background:var(--blue-hi);box-shadow:0 0 8px var(--blue-glow)}
+.po-list.hot li::before{background:var(--wn-yellow);box-shadow:0 0 8px rgba(255,230,0,.5)}
+.po-list strong{color:#fff}
+.po-formats{margin-top:30px}
+.po-formats .break-card{background:rgba(5,8,18,.55)}
+.po-formats .break-card h3{font-size:24px}
 .preorders .break-card p+p{margin-top:10px}
+.preorders .break-card p strong{color:#fff}
 .preorders .po-note{font-size:14px;padding:10px 12px;border-left:3px solid var(--wn-yellow);background:rgba(255,230,0,.06);border-radius:6px;color:var(--muted)}
-.preorders .po-note strong{color:#fff}
-@media (max-width:620px){.preorders{padding:60px 0}.preorders .break-grid{grid-template-columns:1fr}}
+.po-fine{text-align:center;font-size:13px;color:var(--muted);opacity:.8;margin:6px 0 0}
+@media (max-width:900px){.po-cols{grid-template-columns:1fr}.po-formats{grid-template-columns:1fr}}
+@media (max-width:620px){.preorders{padding:60px 0}.po-product{padding:30px 18px 22px}.po-head h3{font-size:27px}}
 
 /* ---------- live on eBay ---------- */
 .ebay{padding:90px 0;background:linear-gradient(180deg,transparent,rgba(29,77,255,.07) 40%,transparent),var(--ink)}
