@@ -411,3 +411,12 @@ html{scroll-padding-top:120px}
 .review-card blockquote::after{content:"”"}
 .review-card figcaption{font-size:13px;color:var(--muted)}
 @media (max-width:620px){.reviews{padding:64px 0}}
+
+/* ---------- homepage releases ---------- */
+.home-releases{padding:80px 0;background:linear-gradient(180deg,transparent,rgba(255,230,0,.04) 50%,transparent)}
+.home-releases::before{content:"";position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--wn-yellow),transparent);opacity:.6}
+.home-releases .rc-list{margin-top:10px}
+@media (max-width:620px){.home-releases{padding:60px 0}}
+
+/* anything marked hidden stays hidden, whatever its layout style */
+[hidden]{display:none!important}

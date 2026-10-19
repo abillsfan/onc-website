@@ -124,6 +124,14 @@ var ONC_LINKS = {
     document.querySelectorAll(".rc-week").forEach(function (w) {
       if (!w.querySelector("li[data-release-date]:not([hidden])")) w.hidden = true;
     });
+    document.querySelectorAll(".rc-list[data-limit]").forEach(function (list) {
+      var max = +list.getAttribute("data-limit"), shown = 0;
+      list.querySelectorAll("li[data-release-date]").forEach(function (li) {
+        if (li.hidden) return;
+        if (shown >= max) li.hidden = true; else shown++;
+      });
+      if (!shown) { var sec = list.closest("section"); if (sec) sec.hidden = true; }
+    });
   }
 
   // Score ticker: today's NFL, college football, MLB, NBA and college basketball games (ESPN public scoreboard feed).
