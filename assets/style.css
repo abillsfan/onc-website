@@ -393,10 +393,15 @@ details p{margin:0;padding:0 22px 22px;color:var(--muted)}
 .rc-tag{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:6px;background:rgba(61,123,255,.18);color:#cfe0ff}
 .rc-tag.brand{background:rgba(255,230,0,.12);color:#fff3a0}
 .rc-note{grid-column:2/4;font-size:13px;color:var(--muted)}
+.rc-tag.pre{background:var(--wn-yellow);color:#000}
+.rc-rel{grid-column:2/4;font-size:14px;color:var(--muted)}
+.rc-rel[hidden]{display:none}
+.rc-rel strong{color:var(--white)}
 @media (max-width:620px){
   .rc-list li{grid-template-columns:72px 1fr}
   .rc-tags{grid-column:2;justify-content:flex-start}
   .rc-note{grid-column:2}
+  .rc-rel{grid-column:2}
   .trust-badge{font-size:13px;border-radius:14px}
 }
 .section-sub a{color:var(--blue-hi);font-weight:600}

@@ -121,6 +121,10 @@ var ONC_LINKS = {
     try { todayCT = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); }
     catch (e) { todayCT = new Date().toISOString().slice(0, 10); }
     rcItems.forEach(function (el) { if (el.getAttribute("data-release-date") < todayCT) el.hidden = true; });
+    // Pre-order items: once the pre-order date arrives, also show the release date
+    document.querySelectorAll(".rc-rel[data-show-from]").forEach(function (el) {
+      if (el.getAttribute("data-show-from") <= todayCT) el.hidden = false;
+    });
     document.querySelectorAll(".rc-week").forEach(function (w) {
       if (!w.querySelector("li[data-release-date]:not([hidden])")) w.hidden = true;
     });
