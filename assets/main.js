@@ -221,11 +221,21 @@ var ONC_LINKS = {
     var tkCached = cacheGet("onc-scores", 10 * 60e3);
     if (tkCached) { try { render(tkCached); clearTimeout(timer); } catch (e) {} }
     var load = function () {
+      // ESPN's default scoreboard still shows last night's games until late morning, so also ask for
+      // today's date (Central) explicitly and merge the two (default keeps late games still in progress).
+      var ymd = dayCT(new Date()).replace(/-/g, "");
+      var get = function (url) {
+        return fetch(url).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+      };
       Promise.all(leagues.map(function (l) {
-        return fetch("https://site.api.espn.com/apis/site/v2/sports/" + l[1] + "/scoreboard")
-          .then(function (r) { return r.ok ? r.json() : null; })
-          .then(function (j) { return [l[0], j]; })
-          .catch(function () { return [l[0], null]; });
+        var base = "https://site.api.espn.com/apis/site/v2/sports/" + l[1] + "/scoreboard";
+        return Promise.all([get(base + "?dates=" + ymd), get(base)]).then(function (pair) {
+          var seen = {}, events = [];
+          pair.forEach(function (j) {
+            ((j && j.events) || []).forEach(function (ev) { if (!seen[ev.id]) { seen[ev.id] = 1; events.push(ev); } });
+          });
+          return [l[0], pair[0] || pair[1] ? { events: events } : null];
+        });
       })).then(function (res) { cacheSet("onc-scores", res); render(res); });
     };
     load();
