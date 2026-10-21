@@ -14,7 +14,7 @@ from datetime import datetime, timedelta, timezone
 SELLER = "cwright181"
 SELLER_URL = "https://www.ebay.com/sch/i.html?_ssn=" + SELLER
 # Browse search needs a category; these cover sports cards/memorabilia and trading card games (Pokemon etc.)
-CATEGORIES = ["64482", "2536"]
+CATEGORIES = ["64482", "212", "261328", "2536", "183454"]
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "ebay-listings.json")
 API = "https://api.ebay.com"
 
@@ -43,6 +43,21 @@ def search(tok, cat):
         offset += len(page)
         if not page or offset >= data.get("total", 0) or offset >= 10000:
             return items
+
+
+def get_item(tok, legacy_id):
+    q = urllib.parse.urlencode({"legacy_item_id": legacy_id})
+    req = urllib.request.Request(API + "/buy/browse/v1/item/get_item_by_legacy_id?" + q, headers={
+        "Authorization": "Bearer " + tok, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except urllib.error.HTTPError as e:
+        if e.code in (404, 410):
+            return None
+        if e.code == 400:  # e.g. item group / ended listing
+            return None
+        raise
 
 
 def money(p):
@@ -92,13 +107,34 @@ def main():
     tok = token(cid, secret)
     seen, items = set(), []
     for cat in CATEGORIES:
-        for s in search(tok, cat):
+        found = search(tok, cat)
+        print(f"::notice::category {cat}: {len(found)} listings")
+        for s in found:
             it = convert(s)
             if not s.get("itemEndDate") and old_ends.get(it["id"]):
                 it["ends"] = old_ends[it["id"]]  # keep placeholder end date stable between runs
             if it["id"] and it["id"] not in seen:
                 seen.add(it["id"])
                 items.append(it)
+    # Backstop: listings already on the site that search missed (e.g. just listed, not indexed yet)
+    now = datetime.now(timezone.utc)
+    for oid in old_ends:
+        if not oid or oid in seen:
+            continue
+        s = get_item(tok, oid)
+        if not s:
+            continue
+        end = s.get("itemEndDate")
+        avail = (s.get("estimatedAvailabilities") or [{}])[0].get("estimatedAvailabilityStatus", "IN_STOCK")
+        if (end and datetime.fromisoformat(end.replace("Z", "+00:00")) <= now) or avail == "OUT_OF_STOCK":
+            continue
+        s.setdefault("legacyItemId", oid)
+        it = convert(s)
+        if not end and old_ends.get(oid):
+            it["ends"] = old_ends[oid]
+        seen.add(it["id"])
+        items.append(it)
+        print(f"::notice::kept {oid} via direct lookup")
     items.sort(key=lambda i: i["ends"])
     if old.get("items") == items:
         print(f"No changes ({len(items)} listings)")
