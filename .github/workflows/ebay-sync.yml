@@ -2,7 +2,8 @@ name: eBay listings sync
 
 # Every hour, pull ONC's active eBay listings and update data/ebay-listings.json.
 # Only commits when something changed (new listing, sold/ended item, new bid), and
-# Hostinger auto-deploys the commit. Run it by hand from the Actions tab any time.
+# Hostinger auto-deploys the commit. Run it by hand from the Actions tab any time,
+# or push a change to this file or scripts/sync_ebay.py.
 on:
   schedule:
     - cron: "17 * * * *"
