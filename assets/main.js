@@ -76,18 +76,23 @@ var ONC_LINKS = {
           var body = el("div", "ebay-body");
           body.appendChild(el("h3", null, it.title));
           var price = el("div", "ebay-price");
-          price.appendChild(el("span", "lbl", it.bids > 0 ? "Current bid" : "Starting bid"));
-          price.appendChild(el("strong", null, it.price));
-          price.appendChild(el("span", "bids", (it.bids || 0) + (it.bids === 1 ? " bid" : " bids")));
+          if (it.fixed) {
+            price.appendChild(el("span", "lbl", "Buy It Now"));
+            price.appendChild(el("strong", null, it.price));
+          } else {
+            price.appendChild(el("span", "lbl", it.bids > 0 ? "Current bid" : "Starting bid"));
+            price.appendChild(el("strong", null, it.price));
+            price.appendChild(el("span", "bids", (it.bids || 0) + (it.bids === 1 ? " bid" : " bids")));
+          }
           body.appendChild(price);
-          if (it.buy_it_now) body.appendChild(el("div", "ebay-bin", "Buy It Now " + it.buy_it_now));
+          if (it.buy_it_now && !it.fixed) body.appendChild(el("div", "ebay-bin", "Buy It Now " + it.buy_it_now));
           var ends = el("div", "ebay-ends");
           var lft = el("strong", null, "");
           ends.appendChild(lft);
           ends.appendChild(document.createTextNode(" · Ends " + fmtEnd(end)));
           body.appendChild(ends);
           var cta = el("span", "btn btn-whatnot btn-sm");
-          cta.appendChild(el("span", null, "Bid on eBay"));
+          cta.appendChild(el("span", null, it.fixed ? "Buy on eBay" : "Bid on eBay"));
           body.appendChild(cta);
           a.appendChild(body);
           ebayGrid.appendChild(a);
@@ -96,7 +101,7 @@ var ONC_LINKS = {
         var up = document.getElementById("ebay-updated");
         if (up && data.updated) {
           var u = new Date(data.updated);
-          if (!isNaN(u)) up.textContent = "Bids shown as of " + u.toLocaleString("en-US", { timeZone: tz, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " CT. Live bids on eBay.";
+          if (!isNaN(u)) up.textContent = "Updated " + u.toLocaleString("en-US", { timeZone: tz, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " CT. Live bids on eBay.";
         }
         tick();
     };

@@ -1,0 +1,36 @@
+name: eBay listings sync
+
+# Every hour, pull ONC's active eBay listings and update data/ebay-listings.json.
+# Only commits when something changed (new listing, sold/ended item, new bid), and
+# Hostinger auto-deploys the commit. Run it by hand from the Actions tab any time.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ebay-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch listings from eBay
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+        run: python3 scripts/sync_ebay.py
+      - name: Commit if changed
+        run: |
+          if git diff --quiet data/ebay-listings.json; then echo "Nothing to commit"; exit 0; fi
+          git config user.name "onc-ebay-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/ebay-listings.json
+          git commit -m "Sync eBay listings"
+          git pull --rebase origin main
+          git push origin HEAD:main
