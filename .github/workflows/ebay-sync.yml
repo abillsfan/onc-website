@@ -7,6 +7,9 @@ on:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/sync_ebay.py, .github/workflows/ebay-sync.yml]
 
 permissions:
   contents: write
