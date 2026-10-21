@@ -8,7 +8,7 @@ from the eBay developer Production keyset:
 Uses eBay's Browse API with an application token, so no eBay sign-in or user token is needed.
 If eBay errors out, the script exits with a failure and leaves the existing file alone.
 """
-import base64, json, os, sys, urllib.parse, urllib.request
+import base64, json, os, sys, urllib.error, urllib.parse, urllib.request
 from datetime import datetime, timedelta, timezone
 
 SELLER = "cwright181"
@@ -112,4 +112,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:400].replace("\n", " ")
+        print(f"::error::eBay API {e.code} at {e.url.split('?')[0]}: {body}")
+        sys.exit(1)
+    except SystemExit as e:
+        if e.code not in (None, 0):
+            print(f"::error::{e.code}")
+        raise
+    except Exception as e:
+        print(f"::error::{type(e).__name__}: {e}")
+        sys.exit(1)
