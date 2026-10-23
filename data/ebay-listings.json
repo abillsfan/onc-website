@@ -1,18 +1,7 @@
 {
-  "updated": "2026-10-21T11:40:54Z",
+  "updated": "2026-10-23T04:58:08Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
-    {
-      "id": "327406744545",
-      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
-      "url": "https://www.ebay.com/itm/327406744545",
-      "img": "https://i.ebayimg.com/images/g/zRQAAeSwfCZqvu3c/s-l225.jpg",
-      "price": "$1,350.00",
-      "bids": 0,
-      "buy_it_now": "$1,900.00",
-      "fixed": false,
-      "ends": "2026-10-22T23:38:07.000Z"
-    },
     {
       "id": "327411424235",
       "title": "2021 Panini Select - Concourse Trey Lance #45 Silver Prizm Die-Cut (RC)",
@@ -34,6 +23,17 @@
       "buy_it_now": null,
       "fixed": false,
       "ends": "2026-10-25T18:17:42.000Z"
+    },
+    {
+      "id": "327418798947",
+      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
+      "url": "https://www.ebay.com/itm/327418798947",
+      "img": "https://i.ebayimg.com/images/g/zRQAAeSwfCZqvu3c/s-l225.jpg",
+      "price": "$1,350.00",
+      "bids": 0,
+      "buy_it_now": "$1,900.00",
+      "fixed": false,
+      "ends": "2026-10-29T23:38:15.000Z"
     }
   ]
 }
