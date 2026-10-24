@@ -22,6 +22,13 @@ var ONC_LINKS = {
     tbd.hidden = showLineup;
   }
 
+  // On Deck: $1-start singles card shows only before a singles show
+  var singles = document.querySelector(".ondeck-singles");
+  if (singles) {
+    var singlesUntil = Date.parse(singles.getAttribute("data-until") || "");
+    singles.hidden = isNaN(singlesUntil) || Date.now() >= singlesUntil;
+  }
+
   var cacheGet = function (k, maxAgeMs) {
     try { var v = JSON.parse(localStorage.getItem(k) || "null"); if (v && Date.now() - v.t < maxAgeMs) return v.d; } catch (e) {}
     return null;
