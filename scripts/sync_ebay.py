@@ -32,7 +32,8 @@ def token(cid, secret):
 def search(tok, cat):
     items, offset = [], 0
     while True:
-        q = urllib.parse.urlencode({"category_ids": cat, "filter": "sellers:{%s}" % SELLER,
+        q = urllib.parse.urlencode({"category_ids": cat, # Browse search drops pure auctions unless buyingOptions is listed explicitly
+                                    "filter": "sellers:{%s},buyingOptions:{AUCTION|FIXED_PRICE|BEST_OFFER}" % SELLER,
                                     "limit": 200, "offset": offset})
         req = urllib.request.Request(API + "/buy/browse/v1/item_summary/search?" + q, headers={
             "Authorization": "Bearer " + tok, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US"})
