@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-25T19:41:40Z",
+  "updated": "2026-10-26T23:48:41Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
     {
@@ -12,6 +12,28 @@
       "buy_it_now": "$1,900.00",
       "fixed": false,
       "ends": "2026-10-29T23:38:15.000Z"
+    },
+    {
+      "id": "327423286649",
+      "title": "2021 Panini Select - Concourse Trey Lance #45 Silver Prizm Die-Cut (RC)",
+      "url": "https://www.ebay.com/itm/327423286649",
+      "img": "https://i.ebayimg.com/images/g/sCUAAeSwhYZqnaty/s-l225.jpg",
+      "price": "$3.00",
+      "bids": 0,
+      "buy_it_now": null,
+      "fixed": false,
+      "ends": "2026-11-01T19:08:02.000Z"
+    },
+    {
+      "id": "327423300350",
+      "title": "2023 Bowman Inception - Auto Juan Guerrero Gold Foil Electricity /50 (AU, RC)",
+      "url": "https://www.ebay.com/itm/327423300350",
+      "img": "https://i.ebayimg.com/images/g/eOcAAeSwFs9qna2U/s-l225.jpg",
+      "price": "$2.00",
+      "bids": 0,
+      "buy_it_now": null,
+      "fixed": false,
+      "ends": "2026-11-01T19:17:51.000Z"
     }
   ]
 }
