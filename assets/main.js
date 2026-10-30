@@ -70,7 +70,9 @@ var ONC_LINKS = {
       ebaySec.hidden = live === 0;
     };
     var drawEbay = function (data) {
-        var items = (data.items || []).slice().sort(function (a, b) { return Date.parse(a.ends) - Date.parse(b.ends); });
+        // highest value first (current bid / price), ties: ending soonest
+        var val = function (it) { var v = parseFloat(String(it.price || "").replace(/[^0-9.]/g, "")); return isNaN(v) ? 0 : v; };
+        var items = (data.items || []).slice().sort(function (a, b) { return (val(b) - val(a)) || (Date.parse(a.ends) - Date.parse(b.ends)); });
         items.forEach(function (it) {
           var end = new Date(it.ends);
           if (isNaN(end) || end <= Date.now()) return;

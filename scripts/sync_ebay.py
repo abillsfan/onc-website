@@ -136,7 +136,10 @@ def main():
         seen.add(it["id"])
         items.append(it)
         print(f"::notice::kept {oid} via direct lookup")
-    items.sort(key=lambda i: i["ends"])
+    def value(i):
+        try: return float((i.get("price") or "0").replace("$", "").replace(",", ""))
+        except ValueError: return 0.0
+    items.sort(key=lambda i: (-value(i), i["ends"]))  # highest value first (Carl, Oct 29 2026)
     if old.get("items") == items:
         print(f"No changes ({len(items)} listings)")
         return
