@@ -30,6 +30,7 @@ EBAY_API = "https://api.ebay.com"
 WN_API = "https://api.whatnot.com/seller-api/rest/v2"
 NS = {"e": "urn:ebay:apis:eBLBaseComponents"}
 SHOW_PULL_HOURS = 3
+UA = "onc-crosslist-sync/1.0 (+https://on-cards.com)"  # Whatnot's firewall blocks the default Python user agent
 HERE = os.path.dirname(os.path.abspath(__file__))
 CONFIG = os.path.join(HERE, "..", "data", "crosslist-config.json")
 STATE = os.environ.get("CROSSLIST_STATE", os.path.join(HERE, "..", "crosslist-state.json"))
@@ -69,7 +70,7 @@ class Whatnot:
         for attempt in range(tries):
             req = urllib.request.Request(url, data=data, method=method, headers={
                 "Authorization": "Bearer " + self.token, "Accept": "application/json",
-                "Content-Type": "application/json"})
+                "Content-Type": "application/json", "User-Agent": UA})
             try:
                 with urllib.request.urlopen(req, timeout=30) as r:
                     time.sleep(0.6)  # stay well under the per-seller rate limit
@@ -115,7 +116,7 @@ class Ebay:
         auth = base64.b64encode(f"{cid}:{secret}".encode()).decode()
         body = urllib.parse.urlencode({"grant_type": "refresh_token", "refresh_token": refresh}).encode()
         req = urllib.request.Request(EBAY_API + "/identity/v1/oauth2/token", data=body, headers={
-            "Authorization": "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded"})
+            "Authorization": "Basic " + auth, "Content-Type": "application/x-www-form-urlencoded", "User-Agent": UA})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 self.token = json.load(r)["access_token"]
@@ -129,7 +130,7 @@ class Ebay:
         req = urllib.request.Request(EBAY_API + "/ws/api.dll", data=xml, headers={
             "X-EBAY-API-SITEID": "0", "X-EBAY-API-COMPATIBILITY-LEVEL": "1349",
             "X-EBAY-API-CALL-NAME": call, "X-EBAY-API-IAF-TOKEN": self.token,
-            "Content-Type": "text/xml"})
+            "Content-Type": "text/xml", "User-Agent": UA})
         with urllib.request.urlopen(req, timeout=30) as r:
             root = ET.fromstring(r.read())
         ack = root.findtext("e:Ack", "", NS)
