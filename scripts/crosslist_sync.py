@@ -192,6 +192,19 @@ def main():
         raise SystemExit("Missing repository secrets: " + ", ".join(missing))
     wn = Whatnot(env["WHATNOT_API_TOKEN"])
 
+    if os.environ.get("DIAGNOSE_EBAY"):  # which keyset (if any) accepts the refresh token; prints no secrets
+        rt = env["EBAY_REFRESH_TOKEN"].strip()
+        say(f"- Refresh token length {len(rt)} chars (eBay refresh tokens are short, ~100-200; a 1,500+ char one is the 2-hour User Token)")
+        for label, a, b in (("EBAY_SYNC_* keyset", os.environ.get("EBAY_SYNC_CLIENT_ID"), os.environ.get("EBAY_SYNC_CLIENT_SECRET")),
+                            ("website EBAY_CLIENT_* keyset", os.environ.get("EBAY_CLIENT_ID"), os.environ.get("EBAY_CLIENT_SECRET"))):
+            if not a or not b:
+                say(f"- {label}: not set"); continue
+            kind = "Sandbox" if "-SBX-" in a else ("Production" if "-PRD-" in a else "unknown type")
+            try:
+                Ebay(a, b, rt); say(f"- {label} ({kind}): ACCEPTED the refresh token")
+            except Exception as e:
+                say(f"- {label} ({kind}): rejected ({str(e)[40:140]})")
+
     if not live:  # Prove both keys work (read-only) so test runs mean something even before any cards are linked.
         me = wn.call("GET", "/users/me") or {}
         say(f"- Whatnot key OK: signed in as {me.get('username')}")

@@ -33,6 +33,7 @@ jobs:
       - name: Sync
         env:
           CROSSLIST_STATE: ${{ runner.temp }}/crosslist-state.json
+          DIAGNOSE_EBAY: "1"
           WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
           EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
