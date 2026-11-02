@@ -113,6 +113,9 @@ class Whatnot:
 # ---------------------------------------------------------------- eBay
 class Ebay:
     def __init__(self, cid, secret, refresh):
+        cid, secret, refresh = cid.strip(), secret.strip(), refresh.strip().strip('"')
+        if "%5E" in refresh or "%23" in refresh:  # copied URL-encoded
+            refresh = urllib.parse.unquote(refresh)
         auth = base64.b64encode(f"{cid}:{secret}".encode()).decode()
         body = urllib.parse.urlencode({"grant_type": "refresh_token", "refresh_token": refresh}).encode()
         req = urllib.request.Request(EBAY_API + "/identity/v1/oauth2/token", data=body, headers={
@@ -121,8 +124,10 @@ class Ebay:
             with urllib.request.urlopen(req, timeout=30) as r:
                 self.token = json.load(r)["access_token"]
         except urllib.error.HTTPError as e:
+            shape = ("starts like a refresh token (v^1.1#)" if refresh.startswith("v^1.1#") else
+                     f"does NOT start with v^1.1# (starts with {refresh[:3]!r}, {len(refresh)} chars)")
             raise RuntimeError(f"eBay sign-in (refresh token) failed: HTTP {e.code} "
-                               + e.read().decode("utf-8", "replace")[:200])
+                               + e.read().decode("utf-8", "replace")[:200] + f". The saved token {shape}.")
 
     def trading(self, call, inner):
         xml = (f'<?xml version="1.0" encoding="utf-8"?><{call}Request xmlns="urn:ebay:apis:eBLBaseComponents">'
