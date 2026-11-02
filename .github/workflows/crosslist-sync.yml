@@ -28,12 +28,13 @@ jobs:
       - name: Get saved sync state
         run: |
           if git fetch --depth 1 origin crosslist-state 2>/dev/null; then
-            git show FETCH_HEAD:crosslist-state.json > "$RUNNER_TEMP/crosslist-state.json" || true
+            git show FETCH_HEAD:crosslist-state.json > "$RUNNER_TEMP/crosslist-state.json" || rm -f "$RUNNER_TEMP/crosslist-state.json"
+            git show FETCH_HEAD:ebay-refresh.enc > "$RUNNER_TEMP/ebay-refresh.enc" || rm -f "$RUNNER_TEMP/ebay-refresh.enc"
           fi
       - name: Sync
         env:
           CROSSLIST_STATE: ${{ runner.temp }}/crosslist-state.json
-          DIAGNOSE_EBAY: "1"
+          EBAY_REFRESH_ENC: ${{ runner.temp }}/ebay-refresh.enc
           WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
           EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}

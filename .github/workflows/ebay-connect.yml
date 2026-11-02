@@ -1,0 +1,43 @@
+name: Connect eBay (one time)
+
+# Run from the Actions tab right after signing in to eBay with the OAuth link.
+# Paste the whole address of eBay's "Thank You" page. The one-time code in it works once, for 5 minutes,
+# and only together with our app secret. See scripts/ebay_connect.py.
+on:
+  workflow_dispatch:
+    inputs:
+      signin_address:
+        description: "Whole address of the eBay 'Thank You' page (starts with https://signin.ebay.com/...)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  connect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Trade the sign-in code for a long-lasting eBay key
+        env:
+          SIGNIN_ADDRESS: ${{ inputs.signin_address }}
+          EBAY_SYNC_CLIENT_ID: ${{ secrets.EBAY_SYNC_CLIENT_ID }}
+          EBAY_SYNC_CLIENT_SECRET: ${{ secrets.EBAY_SYNC_CLIENT_SECRET }}
+          EBAY_ENC_OUT: ${{ runner.temp }}/ebay-refresh.enc
+        run: python3 scripts/ebay_connect.py
+      - name: Save it (encrypted) on the crosslist-state branch
+        run: |
+          dir="$RUNNER_TEMP/state-branch"
+          git config --global user.name "onc-crosslist-sync"
+          git config --global user.email "actions@users.noreply.github.com"
+          if git fetch --depth 1 origin crosslist-state 2>/dev/null; then
+            git worktree add "$dir" FETCH_HEAD
+            git -C "$dir" checkout -B crosslist-state
+          else
+            git worktree add --orphan -b crosslist-state "$dir"
+          fi
+          cp "$RUNNER_TEMP/ebay-refresh.enc" "$dir/ebay-refresh.enc"
+          cd "$dir"
+          git add ebay-refresh.enc
+          git commit -m "eBay connection for cross-list sync (encrypted)"
+          git push origin crosslist-state

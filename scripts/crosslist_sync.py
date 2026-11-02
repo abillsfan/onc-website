@@ -182,6 +182,21 @@ def main():
 
     env = {k: os.environ.get(k) for k in ("WHATNOT_API_TOKEN", "EBAY_CLIENT_ID", "EBAY_CLIENT_SECRET",
                                           "EBAY_REFRESH_TOKEN")}
+    # Preferred: the encrypted long-lasting key saved by the "Connect eBay" workflow (ebay_connect.py).
+    enc_path = os.environ.get("EBAY_REFRESH_ENC")
+    if enc_path and os.path.exists(enc_path) and os.environ.get("EBAY_SYNC_CLIENT_SECRET"):
+        import subprocess
+        with open(enc_path) as f:
+            saved = json.load(f)
+        refresh = subprocess.run(["openssl", "enc", "-d", "-aes-256-cbc", "-pbkdf2", "-iter", "200000", "-base64", "-A",
+                                  "-pass", "env:ENC_KEY"], input=saved["enc"].encode(), capture_output=True, check=True,
+                                 env=dict(os.environ, ENC_KEY=os.environ["EBAY_SYNC_CLIENT_SECRET"].strip())).stdout.decode().strip()
+        print("::add-mask::" + refresh)
+        env["EBAY_REFRESH_TOKEN"] = refresh
+        exp = parse_ts(saved.get("expires", "") + "T00:00:00Z") if saved.get("expires") else None
+        if exp and exp - NOW < timedelta(days=30):
+            print(f"::warning::The eBay connection expires {saved['expires']}. Re-run 'Connect eBay' soon.")
+            say(f"- WARNING: eBay connection expires {saved['expires']}; re-run Connect eBay")
     # The refresh token only works with the keyset (App ID + Cert ID) it was made from. If that's a
     # different eBay app than the website's listing sync uses, its keys are saved as EBAY_SYNC_*.
     if os.environ.get("EBAY_SYNC_CLIENT_ID") and os.environ.get("EBAY_SYNC_CLIENT_SECRET"):
