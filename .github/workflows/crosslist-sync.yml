@@ -1,0 +1,60 @@
+name: eBay + Whatnot cross-list sync
+
+# Every 5 minutes (GitHub sometimes runs scheduled jobs late): keeps cards listed on both eBay and
+# Whatnot from selling twice. See scripts/crosslist_sync.py for the rules.
+# Test mode until data/crosslist-config.json says "live": true.
+# A failed run (double sale, eBay/Whatnot unreachable, bad key) makes GitHub email the repo owner.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [scripts/crosslist_sync.py, data/crosslist-config.json, .github/workflows/crosslist-sync.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crosslist-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - name: Get saved sync state
+        run: |
+          if git fetch --depth 1 origin crosslist-state 2>/dev/null; then
+            git show FETCH_HEAD:crosslist-state.json > "$RUNNER_TEMP/crosslist-state.json" || true
+          fi
+      - name: Sync
+        env:
+          CROSSLIST_STATE: ${{ runner.temp }}/crosslist-state.json
+          WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+          EBAY_REFRESH_TOKEN: ${{ secrets.EBAY_REFRESH_TOKEN }}
+        run: python3 scripts/crosslist_sync.py
+      - name: Save sync state
+        if: always()
+        run: |
+          f="$RUNNER_TEMP/crosslist-state.json"
+          [ -s "$f" ] || { echo "No state to save (test mode or nothing linked)"; exit 0; }
+          dir="$RUNNER_TEMP/state-branch"
+          git config --global user.name "onc-crosslist-sync"
+          git config --global user.email "actions@users.noreply.github.com"
+          if git fetch --depth 1 origin crosslist-state 2>/dev/null; then
+            git worktree add "$dir" FETCH_HEAD
+            git -C "$dir" checkout -B crosslist-state
+          else
+            git worktree add --orphan -b crosslist-state "$dir"
+          fi
+          cp "$f" "$dir/crosslist-state.json"
+          cd "$dir"
+          git add crosslist-state.json
+          git diff --cached --quiet && { echo "State unchanged"; exit 0; }
+          git commit -m "Cross-list sync state"
+          git push origin crosslist-state

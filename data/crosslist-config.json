@@ -1,0 +1,4 @@
+{
+  "live": false,
+  "note": "false = test mode: the eBay/Whatnot cross-list sync only reports what it would do. Set to true to let it change listings."
+}
