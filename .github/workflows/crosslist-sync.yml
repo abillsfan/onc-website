@@ -37,6 +37,8 @@ jobs:
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
           EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
           EBAY_REFRESH_TOKEN: ${{ secrets.EBAY_REFRESH_TOKEN }}
+          EBAY_SYNC_CLIENT_ID: ${{ secrets.EBAY_SYNC_CLIENT_ID }}
+          EBAY_SYNC_CLIENT_SECRET: ${{ secrets.EBAY_SYNC_CLIENT_SECRET }}
         run: python3 scripts/crosslist_sync.py
       - name: Save sync state
         if: always()

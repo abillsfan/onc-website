@@ -182,6 +182,11 @@ def main():
 
     env = {k: os.environ.get(k) for k in ("WHATNOT_API_TOKEN", "EBAY_CLIENT_ID", "EBAY_CLIENT_SECRET",
                                           "EBAY_REFRESH_TOKEN")}
+    # The refresh token only works with the keyset (App ID + Cert ID) it was made from. If that's a
+    # different eBay app than the website's listing sync uses, its keys are saved as EBAY_SYNC_*.
+    if os.environ.get("EBAY_SYNC_CLIENT_ID") and os.environ.get("EBAY_SYNC_CLIENT_SECRET"):
+        env["EBAY_CLIENT_ID"] = os.environ["EBAY_SYNC_CLIENT_ID"]
+        env["EBAY_CLIENT_SECRET"] = os.environ["EBAY_SYNC_CLIENT_SECRET"]
     missing = [k for k, v in env.items() if not v]
     if missing:
         raise SystemExit("Missing repository secrets: " + ", ".join(missing))
