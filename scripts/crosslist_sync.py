@@ -170,6 +170,43 @@ class Ebay:
             "qty": int(it.findtext("e:Quantity", "1", NS) or 1),
         }
 
+    def snapshot(self):
+        """ONE GetMyeBaySelling call per page (active + sold + unsold lists) instead of one GetItem per card,
+        so eBay API use stays ~300 calls/day no matter how many cards are linked."""
+        snap, page = {}, 1
+        money = lambda el, path: float(el.findtext(path, "0", NS) or 0)
+        while True:
+            root = self.trading("GetMyeBaySelling",
+                "<ActiveList><Include>true</Include><Pagination><EntriesPerPage>200</EntriesPerPage>"
+                f"<PageNumber>{page}</PageNumber></Pagination></ActiveList>"
+                + ("<SoldList><Include>true</Include><DurationInDays>60</DurationInDays><Pagination><EntriesPerPage>200</EntriesPerPage></Pagination></SoldList>"
+                   "<UnsoldList><Include>true</Include><DurationInDays>60</DurationInDays><Pagination><EntriesPerPage>200</EntriesPerPage></Pagination></UnsoldList>"
+                   if page == 1 else ""))
+            items = root.findall("e:ActiveList/e:ItemArray/e:Item", NS)
+            for it in items:
+                ss = it.find("e:SellingStatus", NS)
+                ltype = it.findtext("e:ListingType", "", NS)
+                bin_ = money(it, "e:BuyItNowPrice") if ltype == "Chinese" else money(ss, "e:CurrentPrice") if ss is not None else 0
+                snap[it.findtext("e:ItemID", "", NS)] = {
+                    "title": it.findtext("e:Title", "", NS), "type": ltype, "status": "Active",
+                    "bids": int((ss.findtext("e:BidCount", "0", NS) if ss is not None else "0") or 0), "sold": 0,
+                    "bin": bin_, "available": int(it.findtext("e:QuantityAvailable", "1", NS) or 1)}
+            if page == 1:
+                for t in root.findall(".//e:SoldList//e:Transaction", NS):
+                    iid = t.findtext("e:Item/e:ItemID", "", NS)
+                    if iid:
+                        snap[iid] = {"title": t.findtext("e:Item/e:Title", "", NS), "type": "", "status": "Completed",
+                                     "bids": 0, "sold": 1, "bin": 0, "available": 0}
+                for it in root.findall("e:UnsoldList/e:ItemArray/e:Item", NS):
+                    iid = it.findtext("e:ItemID", "", NS)
+                    if iid and iid not in snap:
+                        snap[iid] = {"title": it.findtext("e:Title", "", NS), "type": it.findtext("e:ListingType", "", NS),
+                                     "status": "Completed", "bids": 0, "sold": 0, "bin": 0, "available": 0}
+            pages = int(root.findtext("e:ActiveList/e:PaginationResult/e:TotalNumberOfPages", "1", NS) or 1)
+            if page >= pages or not items:
+                return snap
+            page += 1
+
     def active_ids(self):
         ids, page = [], 1
         while True:
@@ -311,11 +348,20 @@ def main():
         eb, eb_error = None, e
     markup = float(config.get("whatnot_markup", 1.08))
     skipped = state.setdefault("not_crosslisted", {})
+    snap = None
+    if eb:
+        try:
+            snap = eb.snapshot()
+        except Exception as e:
+            eb, eb_error = None, e
     if eb and config.get("auto_crosslist", True):
-        for eid in eb.active_ids():
-            if not eid or eid in links or eid in skipped:
+        for eid, quick in snap.items():
+            if quick["status"] != "Active" or not eid or eid in links or eid in skipped:
                 continue
-            e = eb.item(eid)
+            if quick["bin"] <= 0 and quick["bids"] == 0:
+                continue  # starting-bid-only auction: nothing to price from (re-checked free each run via the snapshot)
+            e = eb.item(eid) if quick["bin"] > 0 and quick["bids"] == 0 and quick["available"] == 1 else quick
+            e.setdefault("pictures", ["x"])
             why = None
             if e["bin"] <= 0:
                 why = "no Buy It Now price"
@@ -384,7 +430,7 @@ def main():
     try:
         if eb_error:
             raise eb_error
-        status = {eid: eb.item(eid) for eid in open_links}
+        status = {eid: (snap.get(eid) or eb.item(eid)) for eid in open_links}  # GetItem only if not in the 60-day lists
     except Exception as e:
         problem(f"Couldn't check eBay ({e}). Hiding Whatnot copies until eBay can be checked.")
         for l in open_links.values():
