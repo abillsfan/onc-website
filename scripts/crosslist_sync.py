@@ -245,7 +245,7 @@ def main():
     newest = last_products
     for p in wn.pages("/products"):
         created = parse_ts(p.get("created_at"))
-        if created and created <= last_products and links:
+        if created and created <= last_products:
             break
         newest = max(newest, created or newest)
         ext = (p.get("external_id") or "").strip()

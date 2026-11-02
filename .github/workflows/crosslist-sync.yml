@@ -5,8 +5,8 @@ name: eBay + Whatnot cross-list sync
 # Test mode until data/crosslist-config.json says "live": true.
 # A failed run (double sale, eBay/Whatnot unreachable, bad key) makes GitHub email the repo owner.
 on:
-  # schedule:            # paused until the test run passes
-  #   - cron: "*/5 * * * *"
+  schedule:
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
