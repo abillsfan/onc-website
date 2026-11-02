@@ -146,10 +146,22 @@ class Ebay:
         return root
 
     def item(self, item_id):
-        root = self.trading("GetItem", f"<ItemID>{int(item_id)}</ItemID>")
+        root = self.trading("GetItem", f"<ItemID>{int(item_id)}</ItemID><IncludeItemSpecifics>true</IncludeItemSpecifics>")
         it = root.find("e:Item", NS)
         ss = it.find("e:SellingStatus", NS)
+        specifics = {}
+        for nv in it.findall("e:ItemSpecifics/e:NameValueList", NS):
+            specifics[nv.findtext("e:Name", "", NS).strip().lower()] = nv.findtext("e:Value", "", NS).strip()
+        ltype = it.findtext("e:ListingType", "", NS)
+        bin_ = float(it.findtext("e:BuyItNowPrice", "0", NS) or 0)
+        if ltype != "Chinese":  # fixed price: the price IS the Buy It Now
+            bin_ = float(ss.findtext("e:CurrentPrice", "0", NS) or it.findtext("e:StartPrice", "0", NS) or 0)
         return {
+            "bin": bin_,
+            "pictures": [u.text for u in it.findall("e:PictureDetails/e:PictureURL", NS) if u.text],
+            "sport": specifics.get("sport", ""),
+            "category": it.findtext("e:PrimaryCategory/e:CategoryName", "", NS),
+            "available": int(it.findtext("e:Quantity", "1", NS) or 1) - int(ss.findtext("e:QuantitySold", "0", NS) or 0),
             "title": it.findtext("e:Title", "", NS),
             "type": it.findtext("e:ListingType", "", NS),          # Chinese = auction, FixedPriceItem
             "status": ss.findtext("e:ListingStatus", "", NS),       # Active, Completed, Ended
@@ -158,8 +170,39 @@ class Ebay:
             "qty": int(it.findtext("e:Quantity", "1", NS) or 1),
         }
 
+    def active_ids(self):
+        ids, page = [], 1
+        while True:
+            root = self.trading("GetMyeBaySelling", "<ActiveList><Include>true</Include><Pagination>"
+                                f"<EntriesPerPage>200</EntriesPerPage><PageNumber>{page}</PageNumber></Pagination></ActiveList>")
+            items = root.findall("e:ActiveList/e:ItemArray/e:Item", NS)
+            ids += [i.findtext("e:ItemID", "", NS) for i in items]
+            pages = int(root.findtext("e:ActiveList/e:PaginationResult/e:TotalNumberOfPages", "1", NS) or 1)
+            if page >= pages or not items:
+                return ids
+            page += 1
+
     def end(self, item_id):
         self.trading("EndItem", f"<ItemID>{int(item_id)}</ItemID><EndingReason>NotAvailable</EndingReason>")
+
+
+SINGLE_CARD_PROFILE = "710722"  # Whatnot "Single card (toploaded)" shipping profile
+SPORT_CATEGORIES = {  # Whatnot taxonomy ids (github.com/Whatnot-Inc/product-taxonomy)
+    "baseball": "586", "football": "590", "basketball": "593", "soccer": "574", "hockey": "599",
+    "ice hockey": "599", "wrestling": "602", "mma": "596", "ufc": "596", "tennis": "2666"}
+
+
+def category_for(e):
+    sport = (e.get("sport") or "").lower()
+    if sport in SPORT_CATEGORIES:
+        return SPORT_CATEGORIES[sport]
+    text = (e.get("title", "") + " " + e.get("category", "")).lower()
+    if "pok" in text and "mon" in text:
+        return "2"
+    for k, v in SPORT_CATEGORIES.items():
+        if k in text:
+            return v
+    return "139"  # Other Sports Cards
 
 
 # ---------------------------------------------------------------- main
@@ -259,6 +302,54 @@ def main():
                 links[eid] = {"ebay_id": eid, "wn_product": p["id"], "wn_variant": v["id"],
                               "title": p.get("title", ""), "state": "active", "since": iso(NOW)}
                 say(f"- New link: eBay {eid} <-> Whatnot {p['id']} ({p.get('title', '')})")
+    # 1b. New eBay listings with a Buy It Now price and no bids -> copy them to the Whatnot shop
+    #     at BIN x markup (Carl: +8% to cover Whatnot's higher fees). Skips ones already linked or tried.
+    try:
+        eb = Ebay(env["EBAY_CLIENT_ID"], env["EBAY_CLIENT_SECRET"], env["EBAY_REFRESH_TOKEN"])
+        eb_error = None
+    except Exception as e:
+        eb, eb_error = None, e
+    markup = float(config.get("whatnot_markup", 1.08))
+    skipped = state.setdefault("not_crosslisted", {})
+    if eb and config.get("auto_crosslist", True):
+        for eid in eb.active_ids():
+            if not eid or eid in links or eid in skipped:
+                continue
+            e = eb.item(eid)
+            why = None
+            if e["bin"] <= 0:
+                why = "no Buy It Now price"
+            elif e["bids"] > 0:
+                why = "already has bids"
+            elif e["available"] != 1:
+                why = f"quantity {e['available']} (only single cards are cross-listed)"
+            elif not e["pictures"]:
+                why = "no photo"
+            if why:
+                if e["bids"] == 0 and e["bin"] <= 0:
+                    pass  # a starting-bid-only auction might get a BIN later; check again next run
+                else:
+                    skipped[eid] = why
+                say(f"- Not cross-listing eBay {eid} ({e['title'][:50]}): {why}")
+                continue
+            price = f"{round(e['bin'] * markup, 2):.2f}"
+            cat = category_for(e)
+            desc = f"Cross-list: eBay {eid}, Whatnot ${price} (eBay BIN ${e['bin']:.2f} x {markup})"
+
+            def create(e=e, eid=eid, price=price, cat=cat):
+                p = wn.call("POST", "/products", {
+                    "title": e["title"][:200], "category": {"id": cat}, "dimension_profile": {"id": SINGLE_CARD_PROFILE},
+                    "external_id": f"ebay:{eid}", "description": e["title"],
+                    "media": [{"url": u} for u in e["pictures"][:6]]})
+                v = wn.variant(p["id"])
+                wn.call("PATCH", f"/products/{p['id']}/variants", {"variants": [{
+                    "id": v["id"], "external_id": f"ebay:{eid}",
+                    "pricing": {"buy_it_now": {"price": {"amount": price, "currency": "USD"}}}}]})
+                wn.set_qty(v["id"], 1, "new")
+                wn.call("POST", f"/merchandising/products/{p['id']}", {"transaction_type": "buy_it_now", "reserve_for_live": False})
+                links[eid] = {"ebay_id": eid, "wn_product": p["id"], "wn_variant": v["id"], "title": e["title"],
+                              "state": "active", "since": iso(NOW)}
+            act(f"add eBay {eid} ({e['title'][:60]}) to the Whatnot shop at ${price} [{desc}]", create)
     say(f"Linked cards: {len(links)}")
 
     open_links = {k: l for k, l in links.items()
@@ -271,6 +362,7 @@ def main():
     for l in open_links.values():
         v = wn.call("GET", f"/products/{l['wn_product']}/variants/{l['wn_variant']}")
         l["_wn_qty"] = ((v or {}).get("inventory") or {}).get("available_quantity")
+        l["_wn_price"] = ((((v or {}).get("pricing") or {}).get("buy_it_now") or {}).get("price") or {}).get("amount")
         if v is None:
             problem(f"Whatnot copy of eBay {l['ebay_id']} ({l['title']}) no longer exists")
 
@@ -290,7 +382,8 @@ def main():
 
     # 4. eBay status for each open link. If eBay can't be checked, hide every Whatnot copy.
     try:
-        eb = Ebay(env["EBAY_CLIENT_ID"], env["EBAY_CLIENT_SECRET"], env["EBAY_REFRESH_TOKEN"])
+        if eb_error:
+            raise eb_error
         status = {eid: eb.item(eid) for eid in open_links}
     except Exception as e:
         problem(f"Couldn't check eBay ({e}). Hiding Whatnot copies until eBay can be checked.")
@@ -351,7 +444,13 @@ def main():
             l["state"] = "hidden_bid"
             continue
 
-        # eBay listing open, no bids, not sold on either site.
+        # eBay listing open, no bids, not sold on either site. Keep the Whatnot price = eBay BIN x markup.
+        if e["bin"] > 0 and l.get("_wn_price") is not None:
+            want = round(e["bin"] * markup, 2)
+            if abs(float(l["_wn_price"]) - want) >= 0.01:
+                act(f"update Whatnot price of {title}: ${float(l['_wn_price']):.2f} -> ${want:.2f} (eBay BIN ${e['bin']:.2f})",
+                    lambda l=l, want=want: wn.call("PATCH", f"/products/{l['wn_product']}/variants", {"variants": [{
+                        "id": l["wn_variant"], "pricing": {"buy_it_now": {"price": {"amount": f"{want:.2f}", "currency": "USD"}}}}]}))
         if l["state"] == "hidden_error" and wn_qty == 0:
             act(f"put Whatnot copy of {title} back (eBay reachable again)", lambda l=l: wn.set_qty(l["wn_variant"], 1, "ebay-ok"))
             l["state"] = "active"
@@ -367,7 +466,7 @@ def main():
                     l["state"] = "pulled_for_show"
 
     for l in links.values():
-        l.pop("_wn_qty", None)
+        l.pop("_wn_qty", None); l.pop("_wn_price", None)
     counts = {}
     for l in links.values():
         counts[l["state"]] = counts.get(l["state"], 0) + 1
@@ -377,7 +476,7 @@ def main():
 
 def save(state, links, newest_product, order_check, live):
     for l in links.values():
-        l.pop("_wn_qty", None)
+        l.pop("_wn_qty", None); l.pop("_wn_price", None)
     state["links"] = sorted(links.values(), key=lambda l: l["ebay_id"])
     state["last_product_scan"] = iso(newest_product)
     if order_check:

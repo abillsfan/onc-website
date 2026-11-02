@@ -1,4 +1,6 @@
 {
   "live": true,
-  "note": "true = live: the sync changes listings on eBay/Whatnot per scripts/crosslist_sync.py. Set to false for test mode (reports only)."
+  "note": "live true = the sync changes listings. auto_crosslist: new eBay listings with a Buy It Now price (and no bids) are added to the Whatnot shop at BIN x whatnot_markup (Carl: +8% for Whatnot's higher fees).",
+  "auto_crosslist": true,
+  "whatnot_markup": 1.08
 }
