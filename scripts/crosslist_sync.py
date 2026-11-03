@@ -162,6 +162,7 @@ class Ebay:
             "sport": specifics.get("sport", ""),
             "category": it.findtext("e:PrimaryCategory/e:CategoryName", "", NS),
             "available": int(it.findtext("e:Quantity", "1", NS) or 1) - int(ss.findtext("e:QuantitySold", "0", NS) or 0),
+            "ending_reason": it.findtext("e:ListingDetails/e:EndingReason", "", NS),
             "title": it.findtext("e:Title", "", NS),
             "type": it.findtext("e:ListingType", "", NS),          # Chinese = auction, FixedPriceItem
             "status": ss.findtext("e:ListingStatus", "", NS),       # Active, Completed, Ended
@@ -227,6 +228,10 @@ SINGLE_CARD_PROFILE = "710722"  # Whatnot "Single card (toploaded)" shipping pro
 SPORT_CATEGORIES = {  # Whatnot taxonomy ids (github.com/Whatnot-Inc/product-taxonomy)
     "baseball": "586", "football": "590", "basketball": "593", "soccer": "574", "hockey": "599",
     "ice hockey": "599", "wrestling": "602", "mma": "596", "ufc": "596", "tennis": "2666"}
+
+
+def norm(title):
+    return " ".join((title or "").lower().split())
 
 
 def category_for(e):
@@ -361,6 +366,24 @@ def main():
         for eid, quick in snap.items():
             if quick["status"] != "Active" or not eid or eid in links or eid in skipped:
                 continue
+            # Relisted card? (eBay gives a relist a new item number.) Reuse its existing Whatnot listing
+            # instead of making a second one (Carl, Nov 3 2026). Match by title among cards no longer on eBay.
+            same = [l for l in links.values() if l["state"] in ("whatnot_only", "ebay_ended")
+                    and norm(l["title"]) == norm(quick["title"])]
+            if same:
+                old = same[0]
+
+                def relink(old=old, eid=eid):
+                    wn.call("PATCH", f"/products/{old['wn_product']}", {"external_id": f"ebay:{eid}"})
+                    wn.call("PATCH", f"/products/{old['wn_product']}/variants", {"variants": [{
+                        "id": old["wn_variant"], "external_id": f"ebay:{eid}"}]})
+                    links.pop(old["ebay_id"], None)
+                    links[eid] = dict(old, ebay_id=eid, previous_ebay_id=old["ebay_id"], state="hidden_nobin", since=iso(NOW))
+                act(f"reconnect relisted eBay {eid} ({quick['title'][:60]}) to its existing Whatnot listing "
+                    f"(was eBay {old['ebay_id']})", relink)
+                if not live:
+                    skipped[eid] = "would be relinked"
+                continue
             if quick["bin"] <= 0 and quick["bids"] == 0:
                 continue  # starting-bid-only auction: nothing to price from (re-checked free each run via the snapshot)
             e = eb.item(eid) if quick["bin"] > 0 and quick["bids"] == 0 and quick["available"] == 1 else quick
@@ -402,7 +425,7 @@ def main():
     say(f"Linked cards: {len(links)}")
 
     open_links = {k: l for k, l in links.items()
-                  if l["state"] in ("active", "hidden_bid", "hidden_error", "pulled_for_show")}
+                  if l["state"] in ("active", "hidden_bid", "hidden_error", "hidden_nobin", "pulled_for_show")}
     if not open_links:
         save(state, links, newest, NOW, live)
         return
@@ -480,7 +503,19 @@ def main():
             continue
 
         if not ebay_open:  # eBay listing ended without selling
-            if l["state"] in ("hidden_bid", "hidden_error") and wn_qty == 0:
+            reason_ended = ""
+            if l["state"] != "pulled_for_show":
+                try:
+                    reason_ended = eb.item(eid).get("ending_reason", "")
+                except Exception:
+                    reason_ended = ""
+            if reason_ended:  # Carl ended it himself -> it comes off Whatnot too (Carl, Nov 3 2026)
+                if wn_qty:
+                    act(f"set Whatnot copy of {title} to 0: eBay listing {eid} was ended ({reason_ended})",
+                        lambda l=l: wn.set_qty(l["wn_variant"], 0, "ebay-ended"))
+                l["state"] = "ebay_ended"
+                continue
+            if l["state"] in ("hidden_bid", "hidden_error", "hidden_nobin") and wn_qty == 0:
                 act(f"put Whatnot copy of {title} back (eBay {eid} ended unsold)", lambda l=l: wn.set_qty(l["wn_variant"], 1, "ebay-unsold"))
             else:
                 say(f"- eBay {eid} ({title}) ended unsold; Whatnot copy left as is")
@@ -493,6 +528,12 @@ def main():
             l["state"] = "hidden_bid"
             continue
 
+        if e["bin"] <= 0:  # open on eBay but no Buy It Now to price from -> keep it off Whatnot
+            if wn_qty:
+                act(f"set Whatnot copy of {title} to 0: eBay {eid} has no Buy It Now price", lambda l=l: wn.set_qty(l["wn_variant"], 0, "ebay-nobin"))
+            l["state"] = "hidden_nobin"
+            continue
+
         # eBay listing open, no bids, not sold on either site. Keep the Whatnot price = eBay BIN x markup.
         if e["bin"] > 0 and l.get("_wn_price") is not None:
             want = round(e["bin"] * markup, 2)
@@ -500,8 +541,10 @@ def main():
                 act(f"update Whatnot price of {title}: ${float(l['_wn_price']):.2f} -> ${want:.2f} (eBay BIN ${e['bin']:.2f})",
                     lambda l=l, want=want: wn.call("PATCH", f"/products/{l['wn_product']}/variants", {"variants": [{
                         "id": l["wn_variant"], "pricing": {"buy_it_now": {"price": {"amount": f"{want:.2f}", "currency": "USD"}}}}]}))
-        if l["state"] == "hidden_error" and wn_qty == 0:
-            act(f"put Whatnot copy of {title} back (eBay reachable again)", lambda l=l: wn.set_qty(l["wn_variant"], 1, "ebay-ok"))
+        if l["state"] in ("hidden_error", "hidden_nobin", "hidden_bid"):
+            if wn_qty == 0:
+                act(f"put Whatnot copy of {title} back (eBay {eid} open with Buy It Now, no bids)",
+                    lambda l=l: wn.set_qty(l["wn_variant"], 1, "ebay-ok"))
             l["state"] = "active"
         elif wn_qty == 0 and l["state"] == "active":
             problem(f"Whatnot copy of {title} is at 0 but no Whatnot order was found. Check it; eBay {eid} left open.")
