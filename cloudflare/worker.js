@@ -1,12 +1,12 @@
 // onc-crosslist-hook: starts the eBay + Whatnot cross-list sync (GitHub workflow crosslist-sync.yml).
 //  * POST /whatnot  - Whatnot webhooks (orders.created etc.)      -> start the sync right away
 //  * POST /ebay     - eBay Platform Notifications (sold, bid, new listing) -> start the sync right away
-//  * every 2 minutes (cron trigger)                                -> start the sync (reliable backup)
+//  * every 2 hours (cron trigger)                                  -> start the sync (backup; alerts if it finds a miss)
 // A poke only STARTS the sync; the sync itself reads both sites' real data, so a fake poke can't
-// change anything. Pokes are throttled to one per minute (the 2-minute timer covers anything dropped)
-// so the sync stays well inside eBay's daily API limit.
+// change anything. Pokes are throttled to one per 10 seconds; GitHub queues at most one run behind
+// the current one, so bursts collapse and the sync stays well inside eBay's daily API limit.
 const WORKFLOW = "https://api.github.com/repos/abillsfan/onc-website/actions/workflows/crosslist-sync.yml/dispatches";
-const THROTTLE_SECONDS = 60;
+const THROTTLE_SECONDS = 10; // a run started this recently will still read the newer data
 
 async function startSync(env, why, force) {
   const cache = caches.default;
@@ -21,7 +21,7 @@ async function startSync(env, why, force) {
       "X-GitHub-Api-Version": "2022-11-28",
       "User-Agent": "onc-crosslist-hook",
     },
-    body: JSON.stringify({ ref: "main" }),
+    body: JSON.stringify({ ref: "main", inputs: { reason: why.startsWith("timer") ? "timer" : why.slice(0, 90) } }),
   });
   if (r.status !== 204) console.log("GitHub dispatch failed", r.status, await r.text());
   return `started (${r.status})`;

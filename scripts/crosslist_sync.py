@@ -314,9 +314,12 @@ def main():
             e = eb_check.item(s["id"])
             say(f"- eBay {s['id']}: {e['type']}, {e['status']}, bids {e['bids']}, sold {e['sold']} ({e['title'][:60]})")
 
+    did = []
+
     def act(desc, fn):
         if live:
             fn()
+            did.append(desc)
             say("- DONE: " + desc)
         else:
             say("- WOULD: " + desc)
@@ -518,6 +521,13 @@ def main():
         counts[l["state"]] = counts.get(l["state"], 0) + 1
     say("States: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())))
     save(state, links, newest, NOW, live)
+    # A backup run (2-hour Cloudflare timer or GitHub's own schedule) should normally find nothing to do,
+    # because eBay/Whatnot notifications start the sync right away. If it DID have to change something,
+    # an instant notification was missed: fail the run so GitHub emails Carl (Carl, Nov 3 2026).
+    reason = os.environ.get("SYNC_REASON", "")
+    if did and reason in ("timer", "schedule"):
+        problem("Instant sync missed this; the backup run caught it: " + "; ".join(did)
+                + ". Everything is fixed now; this is just a heads-up that a notification didn't arrive.")
 
 
 def save(state, links, newest_product, order_check, live):

@@ -1,13 +1,19 @@
 name: eBay + Whatnot cross-list sync
 
-# Every 5 minutes (GitHub sometimes runs scheduled jobs late): keeps cards listed on both eBay and
+# Started instantly by eBay/Whatnot notifications via the Cloudflare hook (cloudflare/worker.js), every 2 hours
+# by its backup timer, and every 6 hours by GitHub as a last resort. Keeps cards listed on both eBay and
 # Whatnot from selling twice. See scripts/crosslist_sync.py for the rules.
 # Test mode until data/crosslist-config.json says "live": true.
 # A failed run (double sale, eBay/Whatnot unreachable, bad key) makes GitHub email the repo owner.
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "41 */6 * * *"   # last-resort backup (Cloudflare starts it every 2 h and on every notification)
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "What started this run (set by the Cloudflare hook)"
+        required: false
+        default: "manual"
   push:
     branches: [main]
     paths: [scripts/crosslist_sync.py, data/crosslist-config.json, .github/workflows/crosslist-sync.yml]
@@ -34,6 +40,7 @@ jobs:
       - name: Sync
         env:
           CROSSLIST_STATE: ${{ runner.temp }}/crosslist-state.json
+          SYNC_REASON: ${{ github.event_name == 'schedule' && 'schedule' || inputs.reason || github.event_name }}
           EBAY_REFRESH_ENC: ${{ runner.temp }}/ebay-refresh.enc
           WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
