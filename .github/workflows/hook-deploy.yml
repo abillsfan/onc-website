@@ -34,7 +34,7 @@ jobs:
           if [ -n "$cur" ]; then echo "workers.dev name: $cur"; exit 0; fi
           for name in on-cards onc-cards outta-nowhere-cards; do
             out=$(curl -sS -X PUT -H "$auth" -H "Content-Type: application/json" --data "{\"subdomain\":\"$name\"}" "$api")
-            if echo "$out" | grep -q '"success":true'; then echo "Registered workers.dev name: $name"; exit 0; fi
+            if echo "$out" | grep -qE '"success": ?true'; then echo "Registered workers.dev name: $name"; exit 0; fi
             echo "Couldn't use $name: $out"
           done
           echo "::error::Couldn't register a workers.dev name"; exit 1
