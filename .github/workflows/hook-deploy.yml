@@ -26,6 +26,18 @@ jobs:
         run: |
           [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "::error::Missing secret CLOUDFLARE_API_TOKEN"; exit 1; }
           [ -n "${{ secrets.GH_DISPATCH_TOKEN }}" ] || { echo "::error::Missing secret GH_DISPATCH_TOKEN"; exit 1; }
+      - name: Make sure the account has a workers.dev name (one-time, free)
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          cur=$(curl -fsS -H "$auth" "$api" | python3 -c "import json,sys; print((json.load(sys.stdin).get('result') or {}).get('subdomain') or '')" || true)
+          if [ -n "$cur" ]; then echo "workers.dev name: $cur"; exit 0; fi
+          for name in on-cards onc-cards outta-nowhere-cards; do
+            out=$(curl -sS -X PUT -H "$auth" -H "Content-Type: application/json" --data "{\"subdomain\":\"$name\"}" "$api")
+            if echo "$out" | grep -q '"success":true'; then echo "Registered workers.dev name: $name"; exit 0; fi
+            echo "Couldn't use $name: $out"
+          done
+          echo "::error::Couldn't register a workers.dev name"; exit 1
       - name: Deploy worker
         working-directory: cloudflare
         run: |
