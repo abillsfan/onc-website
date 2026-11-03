@@ -28,7 +28,7 @@ def main():
     eb.trading("SetNotificationPreferences",
                "<ApplicationDeliveryPreferences>"
                f"<ApplicationURL>{url}</ApplicationURL><ApplicationEnable>Enable</ApplicationEnable>"
-               "<DeviceType>Platform</DeviceType><PayloadVersion>1349</PayloadVersion>"
+               "<DeviceType>Platform</DeviceType>"
                "</ApplicationDeliveryPreferences>"
                f"<UserDeliveryPreferenceArray>{events}</UserDeliveryPreferenceArray>")
     root = eb.trading("GetNotificationPreferences", "<PreferenceLevel>Application</PreferenceLevel>")

@@ -60,6 +60,7 @@ jobs:
         run: |
           git fetch --depth 1 origin crosslist-state
           git show FETCH_HEAD:ebay-refresh.enc > "$EBAY_REFRESH_ENC"
+          set -o pipefail
           python3 scripts/ebay_notifications.py | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Test the hook
         run: curl -fsS "$HOOK_URL" && echo
