@@ -68,4 +68,17 @@ jobs:
           git add crosslist-state.json
           git diff --cached --quiet && { echo "State unchanged"; exit 0; }
           git commit -m "Cross-list sync state"
-          git push origin crosslist-state
+          # Retry the push: GitHub occasionally returns a one-off 5xx error.
+          for attempt in 1 2 3 4 5; do
+            if out=$(git push origin crosslist-state 2>&1); then
+              echo "$out"; exit 0
+            fi
+            echo "$out"
+            # Only retry GitHub-side/network glitches; real problems fail right away.
+            echo "$out" | grep -qiE 'internal server error|50[0-9]|bad gateway|service unavailable|timed out|could not resolve|unable to access|connection reset|early eof' \
+              || { echo "::error::Push failed (not a temporary GitHub error)"; exit 1; }
+            [ "$attempt" -lt 5 ] && { echo "Temporary GitHub error, retrying in $((attempt * 15))s..."; sleep $((attempt * 15)); }
+          done
+          # GitHub still down after all retries: the sync itself worked and the next run
+          # re-saves state, so warn instead of failing (no failure email).
+          echo "::warning::Couldn't save sync state (GitHub server error after 5 tries). Next run will save it."
