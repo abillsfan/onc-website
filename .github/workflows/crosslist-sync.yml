@@ -20,6 +20,7 @@ on:
 
 permissions:
   contents: write
+  actions: write   # to start the website's eBay refresh (ebay-sync.yml)
 
 concurrency:
   group: crosslist-sync
@@ -38,6 +39,7 @@ jobs:
             git show FETCH_HEAD:ebay-refresh.enc > "$RUNNER_TEMP/ebay-refresh.enc" || rm -f "$RUNNER_TEMP/ebay-refresh.enc"
           fi
       - name: Sync
+        id: sync
         env:
           CROSSLIST_STATE: ${{ runner.temp }}/crosslist-state.json
           SYNC_REASON: ${{ github.event_name == 'schedule' && 'schedule' || inputs.reason || github.event_name }}
@@ -49,6 +51,14 @@ jobs:
           EBAY_SYNC_CLIENT_ID: ${{ secrets.EBAY_SYNC_CLIENT_ID }}
           EBAY_SYNC_CLIENT_SECRET: ${{ secrets.EBAY_SYNC_CLIENT_SECRET }}
         run: python3 scripts/crosslist_sync.py
+      # Website in step too: any eBay notification (new listing, ended, sold, bid, price change) or a
+      # change this run made (e.g. ended an eBay listing after a Whatnot sale) refreshes On-Cards.com.
+      - name: Refresh website eBay listings
+        if: always() && (startsWith(inputs.reason, 'ebay:') || steps.sync.outputs.changed == 'true')
+        env:
+          SYNC_REASON: ${{ github.event_name == 'schedule' && 'schedule' || inputs.reason || github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ebay-sync.yml -R "$GITHUB_REPOSITORY" -f reason="crosslist:$SYNC_REASON"
       - name: Save sync state
         if: always()
         run: |

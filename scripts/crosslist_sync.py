@@ -574,6 +574,11 @@ def main():
     # because eBay/Whatnot notifications start the sync right away. If it DID have to change something,
     # an instant notification was missed: fail the run so GitHub emails Carl (Carl, Nov 3 2026).
     reason = os.environ.get("SYNC_REASON", "")
+    # Tell the workflow whether eBay listings changed, so it refreshes the website's eBay section
+    # (Carl, Nov 6 2026: website, Whatnot and eBay all in step).
+    if did and os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            f.write("changed=true\n")
     if did and reason in ("timer", "schedule"):
         problem("Instant sync missed this; the backup run caught it: " + "; ".join(did)
                 + ". Everything is fixed now; this is just a heads-up that a notification didn't arrive.")

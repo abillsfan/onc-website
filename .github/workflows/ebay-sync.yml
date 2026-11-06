@@ -1,6 +1,6 @@
 name: eBay listings sync
 
-# Once every morning (about 7 AM Central; GitHub may run it a bit late), pull ONC's active eBay listings and update data/ebay-listings.json.
+# Instantly after eBay listing changes (started by the cross-list sync), plus once every morning (about 7 AM Central; GitHub may run it a bit late), pull ONC's active eBay listings and update data/ebay-listings.json.
 # Only commits when something changed (new listing, sold/ended item, new bid), and
 # Hostinger auto-deploys the commit. Run it by hand from the Actions tab any time,
 # or push a change to this file or scripts/sync_ebay.py.
@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: "17 12 * * *"
   workflow_dispatch:
+    inputs:
+      reason:
+        description: "What started this run (the cross-list sync passes the eBay event)"
+        required: false
+        default: "manual"
   push:
     branches: [main]
     paths: [scripts/sync_ebay.py, .github/workflows/ebay-sync.yml]
@@ -29,6 +34,14 @@ jobs:
           EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
           EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
         run: python3 scripts/sync_ebay.py
+      # eBay's search index can take a few minutes to show a brand-new or just-ended listing,
+      # so runs started by a notification check again after 4 minutes.
+      - name: Check again once eBay's search catches up
+        if: startsWith(inputs.reason, 'crosslist:')
+        env:
+          EBAY_CLIENT_ID: ${{ secrets.EBAY_CLIENT_ID }}
+          EBAY_CLIENT_SECRET: ${{ secrets.EBAY_CLIENT_SECRET }}
+        run: sleep 240 && python3 scripts/sync_ebay.py
       - name: Commit if changed
         run: |
           if git diff --quiet data/ebay-listings.json; then echo "Nothing to commit"; exit 0; fi
