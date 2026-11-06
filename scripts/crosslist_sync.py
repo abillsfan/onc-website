@@ -101,6 +101,23 @@ class Whatnot:
             return v
         return None
 
+    def in_shop(self, product_id):
+        """Make sure a product is Buy It Now in the shop, not reserved for live (reserved = shows as a draft,
+        not in the profile store). Whatnot ignored the create-time setting on Nov 5 2026, so set it and
+        read it back; returns True once Whatnot reports it in the shop."""
+        path = f"/merchandising/products/{product_id}"
+        body = {"transaction_type": "buy_it_now", "reserve_for_live": False}
+        for method in ("PATCH", "PUT", "POST"):
+            try:
+                self.call(method, path, body)
+            except RuntimeError as e:
+                if "HTTP 405" in str(e):
+                    continue
+                raise
+            if (self.call("GET", path) or {}).get("reserved_for_live") is False:
+                return True
+        raise RuntimeError(f"Whatnot product {product_id} is still reserved for live after trying to put it in the shop")
+
     def set_qty(self, variant_id, qty, why):
         res = self.call("POST", "/inventory/set", {"items": [{
             "variant_id": variant_id, "quantity": qty,
@@ -424,7 +441,7 @@ def main():
                     "id": v["id"], "external_id": f"ebay:{eid}",
                     "pricing": {"buy_it_now": {"price": {"amount": price, "currency": "USD"}}}}]})
                 wn.set_qty(v["id"], 1, "new")
-                wn.call("POST", f"/merchandising/products/{p['id']}", {"transaction_type": "buy_it_now", "reserve_for_live": False})
+                wn.in_shop(p["id"])
                 links[eid] = {"ebay_id": eid, "wn_product": p["id"], "wn_variant": v["id"], "title": e["title"],
                               "state": "active", "since": iso(NOW)}
             act(f"add eBay {eid} ({e['title'][:60]}) to the Whatnot shop at ${price} [{desc}]", create)
@@ -555,8 +572,17 @@ def main():
         elif wn_qty == 0 and l["state"] == "active":
             problem(f"Whatnot copy of {title} is at 0 but no Whatnot order was found. Check it; eBay {eid} left open.")
 
-        if soon:
+        # Cards for sale (Whatnot qty 1) belong in the shop, not hidden as reserved-for-live drafts,
+        # unless Carl has put the card in a show.
+        m = None
+        if l["state"] in ("active", "whatnot_only") and (wn_qty or 0) > 0:
             m = wn.call("GET", f"/merchandising/products/{l['wn_product']}") or {}
+            if m.get("reserved_for_live") and not m.get("active_in_shows"):
+                act(f"put Whatnot copy of {title} in the shop (it was reserved for live, so it showed as a draft)",
+                    lambda l=l: wn.in_shop(l["wn_product"]))
+
+        if soon:
+            m = m or wn.call("GET", f"/merchandising/products/{l['wn_product']}") or {}
             if m.get("active_in_shows"):
                 shows = {s.get("id") for s in wn.pages(f"/merchandising/products/{l['wn_product']}/shows")}
                 if shows & soon:
