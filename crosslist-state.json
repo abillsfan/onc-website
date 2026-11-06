@@ -1,26 +1,18 @@
 {
-  "links": [
-    {
-      "ebay_id": "327429549046",
-      "wn_product": "654572545",
-      "wn_variant": "6e433277-eea5-4da6-b07c-dd21c329cfa7",
-      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
-      "state": "whatnot_only",
-      "since": "2026-11-02T12:55:12Z"
-    },
-    {
-      "ebay_id": "327442131447",
-      "wn_product": "659299180",
-      "wn_variant": "df355505-ede1-460b-9af1-56225bc54ae4",
-      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
-      "state": "active",
-      "since": "2026-11-06T00:38:55Z"
-    }
-  ],
-  "last_product_scan": "2026-11-06T00:38:42Z",
-  "last_order_check": "2026-11-06T10:17:49Z",
-  "last_run": "2026-11-06T10:17:49Z",
-  "not_crosslisted": {
-    "327426245178": "already has bids"
+ "links": [
+  {
+   "ebay_id": "327442131447",
+   "wn_product": "659299180",
+   "wn_variant": "df355505-ede1-460b-9af1-56225bc54ae4",
+   "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
+   "state": "active",
+   "since": "2026-11-06T00:38:55Z"
   }
+ ],
+ "last_product_scan": "2026-11-06T00:38:42Z",
+ "last_order_check": "2026-11-06T10:17:49Z",
+ "last_run": "2026-11-06T10:17:49Z",
+ "not_crosslisted": {
+  "327426245178": "already has bids"
+ }
 }
