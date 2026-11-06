@@ -368,8 +368,14 @@ def main():
                 continue
             # Relisted card? (eBay gives a relist a new item number.) Reuse its existing Whatnot listing
             # instead of making a second one (Carl, Nov 3 2026). Match by title among cards no longer on eBay.
-            same = [l for l in links.values() if l["state"] in ("whatnot_only", "ebay_ended")
-                    and norm(l["title"]) == norm(quick["title"])]
+            # Also catch the old listing ending in this same run (eBay relists the moment an auction ends,
+            # so its link can still read "active" here; Nov 5 2026 the Zazueta relist got a duplicate that way).
+            def gone(l):
+                if l["state"] in ("whatnot_only", "ebay_ended"):
+                    return True
+                o = snap.get(l["ebay_id"])
+                return l["ebay_id"] != eid and (o is None or o["status"] != "Active")
+            same = [l for l in links.values() if gone(l) and norm(l["title"]) == norm(quick["title"])]
             if same:
                 old = same[0]
 
