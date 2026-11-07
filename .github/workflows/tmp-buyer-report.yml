@@ -7,6 +7,7 @@ permissions:
 jobs:
   pull:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v5
       - name: Pull Whatnot orders and shows (output encrypted; nothing printed)
@@ -36,6 +37,8 @@ jobs:
           orders=[{"show":o.get("show_id"),"status":o.get("status"),"type":o.get("transaction_type"),
                    "buyer":(o.get("buyer") or {}).get("username"),"name":(o.get("buyer") or {}).get("display_name"),
                    "sub":(o.get("amounts") or {}).get("subtotal",{}).get("amount"),"at":o.get("created_at"),"id":o.get("id")} for o in pages("/orders")]
+          for o in orders:
+              o["items"]=[(i.get("purchased_item") or {}).get("title","")+" | "+((i.get("purchased_item") or {}).get("description") or "") for i in pages(f"/orders/{o['id']}/items")]
           shows=[{"id":s["id"],"title":s["title"],"start":s.get("scheduled_start_at")} for st in ("ended","stopped") for s in pages("/shows",{"status":st})]
           json.dump({"orders":orders,"shows":shows},open("data.json","w"))
           print("orders:",len(orders),"shows:",len(shows))
