@@ -1,0 +1,53 @@
+name: tmp buyer report (encrypted, temporary)
+on:
+  push:
+    branches: [tmp-buyer-report]
+permissions:
+  contents: read
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Pull Whatnot orders and shows (output encrypted; nothing printed)
+        env:
+          WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
+        run: |
+          python3 - <<'P'
+          import json, os, time, urllib.request, urllib.parse
+          API="https://api.whatnot.com/seller-api/rest/v2"; T=os.environ["WHATNOT_API_TOKEN"]
+          def get(path, q):
+              for a in range(6):
+                  r=urllib.request.Request(API+path+"?"+urllib.parse.urlencode(q),headers={"Authorization":"Bearer "+T,"Accept":"application/json","User-Agent":"onc-report/1.0 (+https://on-cards.com)"})
+                  try:
+                      with urllib.request.urlopen(r,timeout=30) as f: time.sleep(0.6); return json.load(f)
+                  except urllib.error.HTTPError as e:
+                      if e.code==429: time.sleep(2**a); continue
+                      raise
+          def pages(path, q={}):
+              c=None
+              while True:
+                  qq=dict(q,limit=50)
+                  if c: qq["cursor"]=c
+                  p=get(path,qq) or {}
+                  yield from p.get("data",[])
+                  c=p.get("next_cursor")
+                  if not c: return
+          orders=[{"show":o.get("show_id"),"status":o.get("status"),"type":o.get("transaction_type"),
+                   "buyer":(o.get("buyer") or {}).get("username"),"name":(o.get("buyer") or {}).get("display_name"),
+                   "sub":(o.get("amounts") or {}).get("subtotal",{}).get("amount"),"at":o.get("created_at"),"id":o.get("id")} for o in pages("/orders")]
+          shows=[{"id":s["id"],"title":s["title"],"start":s.get("scheduled_start_at")} for st in ("ended","stopped") for s in pages("/shows",{"status":st})]
+          json.dump({"orders":orders,"shows":shows},open("data.json","w"))
+          print("orders:",len(orders),"shows:",len(shows))
+          P
+          openssl rand -out k.bin 32
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in data.json -out data.enc -pass file:k.bin
+          openssl pkeyutl -encrypt -pubin -inkey .github/report-pub.pem -in k.bin -out k.enc
+          rm -f data.json k.bin
+      - uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: |
+            data.enc
+            k.enc
+          retention-days: 1
