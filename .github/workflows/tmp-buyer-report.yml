@@ -3,7 +3,7 @@ on:
   push:
     branches: [tmp-buyer-report]
 permissions:
-  contents: read
+  contents: write
 jobs:
   pull:
     runs-on: ubuntu-latest
@@ -44,10 +44,7 @@ jobs:
           openssl enc -aes-256-cbc -pbkdf2 -salt -in data.json -out data.enc -pass file:k.bin
           openssl pkeyutl -encrypt -pubin -inkey .github/report-pub.pem -in k.bin -out k.enc
           rm -f data.json k.bin
-      - uses: actions/upload-artifact@v4
-        with:
-          name: report
-          path: |
-            data.enc
-            k.enc
-          retention-days: 1
+      - name: Save encrypted result to this temporary branch
+        run: |
+          git config user.name onc-report; git config user.email actions@users.noreply.github.com
+          mkdir -p out && mv data.enc k.enc out/ && git add out && git commit -qm "encrypted report" && git push -q origin HEAD:tmp-buyer-report
