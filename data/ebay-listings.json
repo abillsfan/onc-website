@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-08T22:31:20Z",
+  "updated": "2026-11-08T22:39:08Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
     {
@@ -12,6 +12,17 @@
       "buy_it_now": "$1,325.00",
       "fixed": false,
       "ends": "2026-11-13T00:38:32.000Z"
+    },
+    {
+      "id": "327446828691",
+      "title": "2023 Bowman Inception - Auto Juan Guerrero Gold Foil Electricity /50 (AU, RC)",
+      "url": "https://www.ebay.com/itm/327446828691",
+      "img": "https://i.ebayimg.com/images/g/eOcAAeSwFs9qna2U/s-l225.jpg",
+      "price": "$2.00",
+      "bids": 0,
+      "buy_it_now": "$2.00",
+      "fixed": true,
+      "ends": "2026-12-08T22:39:06Z"
     }
   ]
 }
