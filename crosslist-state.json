@@ -10,9 +10,10 @@
     }
   ],
   "last_product_scan": "2026-11-08T11:32:30Z",
-  "last_order_check": "2026-11-08T18:17:49Z",
-  "last_run": "2026-11-08T18:17:49Z",
+  "last_order_check": "2026-11-08T19:06:39Z",
+  "last_run": "2026-11-08T19:06:39Z",
   "not_crosslisted": {
-    "327426245178": "already has bids"
+    "327426245178": "already has bids",
+    "327434138954": "no Buy It Now price"
   }
 }
