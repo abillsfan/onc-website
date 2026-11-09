@@ -22,7 +22,7 @@ Secrets (repository secrets, never printed): EBAY_CLIENT_ID, EBAY_CLIENT_SECRET,
 WHATNOT_API_TOKEN. State (links + what the sync did) lives in crosslist-state.json on the
 "crosslist-state" branch so state commits don't redeploy the website. No buyer details are stored.
 """
-import base64, json, os, sys, time, urllib.error, urllib.parse, urllib.request
+import base64, json, math, os, sys, time, urllib.error, urllib.parse, urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 
@@ -52,6 +52,12 @@ def parse_ts(s):
 def say(msg):
     print(msg)
     lines.append(msg)
+
+
+def whatnot_price(ebay_bin, markup):
+    """Whatnot only accepts whole-dollar prices (422 "amount must be a whole number of USD", Nov 8 2026),
+    so eBay BIN x markup is rounded UP to the next dollar (Carl, Nov 9 2026: never undercut the markup)."""
+    return int(math.ceil(round(ebay_bin * markup, 2)))
 
 
 def problem(msg):
@@ -427,7 +433,7 @@ def main():
                     skipped[eid] = why
                 say(f"- Not cross-listing eBay {eid} ({e['title'][:50]}): {why}")
                 continue
-            price = f"{round(e['bin'] * markup, 2):.2f}"
+            price = str(whatnot_price(e["bin"], markup))
             cat = category_for(e)
             desc = f"Cross-list: eBay {eid}, Whatnot ${price} (eBay BIN ${e['bin']:.2f} x {markup})"
 
@@ -559,11 +565,11 @@ def main():
 
         # eBay listing open, no bids, not sold on either site. Keep the Whatnot price = eBay BIN x markup.
         if e["bin"] > 0 and l.get("_wn_price") is not None:
-            want = round(e["bin"] * markup, 2)
+            want = whatnot_price(e["bin"], markup)
             if abs(float(l["_wn_price"]) - want) >= 0.01:
-                act(f"update Whatnot price of {title}: ${float(l['_wn_price']):.2f} -> ${want:.2f} (eBay BIN ${e['bin']:.2f})",
+                act(f"update Whatnot price of {title}: ${float(l['_wn_price']):.2f} -> ${want} (eBay BIN ${e['bin']:.2f})",
                     lambda l=l, want=want: wn.call("PATCH", f"/products/{l['wn_product']}/variants", {"variants": [{
-                        "id": l["wn_variant"], "pricing": {"buy_it_now": {"price": {"amount": f"{want:.2f}", "currency": "USD"}}}}]}))
+                        "id": l["wn_variant"], "pricing": {"buy_it_now": {"price": {"amount": str(want), "currency": "USD"}}}}]}))
         if l["state"] in ("hidden_error", "hidden_nobin", "hidden_bid"):
             if wn_qty == 0:
                 act(f"put Whatnot copy of {title} back (eBay {eid} open with Buy It Now, no bids)",
