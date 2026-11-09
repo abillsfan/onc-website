@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09T12:14:14Z",
+  "updated": "2026-11-09T12:18:42Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
     {
@@ -45,6 +45,17 @@
       "buy_it_now": "$2.00",
       "fixed": true,
       "ends": "2026-12-09T12:14:12Z"
+    },
+    {
+      "id": "327447916515",
+      "title": "2024 Panini Absolute Malik Nabers Rookie Force #RF-MNS (MEM, RC) Giants",
+      "url": "https://www.ebay.com/itm/327447916515",
+      "img": "https://i.ebayimg.com/images/g/YoQAAeSwCTtq8bhi/s-l225.jpg",
+      "price": "$2.00",
+      "bids": 0,
+      "buy_it_now": "$2.00",
+      "fixed": true,
+      "ends": "2026-12-09T12:18:40Z"
     }
   ]
 }
