@@ -119,6 +119,13 @@ class Whatnot:
             except RuntimeError as e:
                 if "HTTP 405" in str(e):
                     continue
+                if "missing-scope" in str(e):
+                    # The sync's Whatnot token lacks write:merchandising (Nov 9 2026). Don't crash the whole
+                    # sync over it: leave the card reserved for live, warn, and keep syncing everything else.
+                    print(f"::warning::Can't put Whatnot product {product_id} in the shop: the WHATNOT_API_TOKEN "
+                          "secret is missing the write:merchandising scope. Make a new token with that scope.")
+                    say(f"- Couldn't put Whatnot product {product_id} in the shop (token missing write:merchandising)")
+                    return False
                 raise
             if (self.call("GET", path) or {}).get("reserved_for_live") is False:
                 return True
