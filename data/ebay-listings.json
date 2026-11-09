@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-08T22:39:08Z",
+  "updated": "2026-11-09T12:07:58Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
     {
@@ -12,6 +12,17 @@
       "buy_it_now": "$1,325.00",
       "fixed": false,
       "ends": "2026-11-13T00:38:32.000Z"
+    },
+    {
+      "id": "327447901252",
+      "title": "2025 Panini Prizm #PJY-CLB CeeDee Lamb Premier Jerseys Dallas Cowboys",
+      "url": "https://www.ebay.com/itm/327447901252",
+      "img": "https://i.ebayimg.com/images/g/VzEAAeSwKJZq8bYi/s-l225.jpg",
+      "price": "$3.00",
+      "bids": 0,
+      "buy_it_now": "$3.00",
+      "fixed": true,
+      "ends": "2026-12-09T12:07:56Z"
     },
     {
       "id": "327446828691",
