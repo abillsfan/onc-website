@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-09T12:18:42Z",
+  "updated": "2026-11-10T11:57:39Z",
   "seller_url": "https://www.ebay.com/sch/i.html?_ssn=cwright181",
   "items": [
     {
@@ -12,6 +12,17 @@
       "buy_it_now": "$1,325.00",
       "fixed": false,
       "ends": "2026-11-13T00:38:32.000Z"
+    },
+    {
+      "id": "327449384588",
+      "title": "2022 Bowman Platinum - Bobby Witt Jr. #51 (RC)",
+      "url": "https://www.ebay.com/itm/327449384588",
+      "img": "https://i.ebayimg.com/images/g/CiUAAeSwmalq8wUr/s-l225.jpg",
+      "price": "$25.00",
+      "bids": 0,
+      "buy_it_now": "$25.00",
+      "fixed": true,
+      "ends": "2026-12-10T11:57:37Z"
     },
     {
       "id": "327447901252",
