@@ -63,11 +63,19 @@
       "title": "Topps Chrome Platinum Mike Yastrzemski Platinum Parallel Kansas City Royals",
       "state": "active",
       "since": "2026-11-10T11:58:43Z"
+    },
+    {
+      "ebay_id": "327449389429",
+      "wn_product": "665344725",
+      "wn_variant": "af3dd92f-f093-40a8-ba51-1c66be1a7675",
+      "title": "2026 Topps Paul Skenes Perennial All-Stars #PAS-20 Pirates 35/50",
+      "state": "active",
+      "since": "2026-11-10T12:01:33Z"
     }
   ],
-  "last_product_scan": "2026-11-10T11:55:52Z",
-  "last_order_check": "2026-11-10T11:58:43Z",
-  "last_run": "2026-11-10T11:58:43Z",
+  "last_product_scan": "2026-11-10T11:58:46Z",
+  "last_order_check": "2026-11-10T12:01:33Z",
+  "last_run": "2026-11-10T12:01:33Z",
   "not_crosslisted": {
     "327426245178": "already has bids",
     "327434138954": "no Buy It Now price"
