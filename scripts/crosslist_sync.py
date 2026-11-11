@@ -353,7 +353,10 @@ def main():
 
     def act(desc, fn):
         if live:
-            fn()
+            # A step that couldn't be done (returns False, e.g. Whatnot token missing a scope) isn't a
+            # change: don't count it, or every backup run "catches" it again and fails with an email.
+            if fn() is False:
+                return
             did.append(desc)
             say("- DONE: " + desc)
         else:
