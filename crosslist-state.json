@@ -1,14 +1,6 @@
 {
   "links": [
     {
-      "ebay_id": "327442131447",
-      "wn_product": "659299180",
-      "wn_variant": "df355505-ede1-460b-9af1-56225bc54ae4",
-      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
-      "state": "active",
-      "since": "2026-11-06T00:38:55Z"
-    },
-    {
       "ebay_id": "327446828691",
       "wn_product": "663671566",
       "wn_variant": "0336898c-542a-496d-b98a-3496fcfc6482",
@@ -71,11 +63,20 @@
       "title": "2026 Topps Paul Skenes Perennial All-Stars #PAS-20 Pirates 35/50",
       "state": "active",
       "since": "2026-11-10T12:01:33Z"
+    },
+    {
+      "ebay_id": "327453362033",
+      "wn_product": "659299180",
+      "wn_variant": "df355505-ede1-460b-9af1-56225bc54ae4",
+      "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
+      "state": "active",
+      "since": "2026-11-13T00:38:52Z",
+      "previous_ebay_id": "327442131447"
     }
   ],
   "last_product_scan": "2026-11-10T12:01:36Z",
-  "last_order_check": "2026-11-13T00:17:48Z",
-  "last_run": "2026-11-13T00:17:48Z",
+  "last_order_check": "2026-11-13T00:38:52Z",
+  "last_run": "2026-11-13T00:38:52Z",
   "not_crosslisted": {
     "327426245178": "already has bids",
     "327434138954": "no Buy It Now price"
