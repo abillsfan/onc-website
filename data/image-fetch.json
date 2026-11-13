@@ -1,7 +1,23 @@
 {
   "note": "Images GitHub downloads for the site (the build machine can't reach these hosts). Add an entry and push; .github/workflows/image-fetch.yml saves each file that doesn't exist yet. height = resize to this many pixels tall; format from the file extension (.webp for the site, .jpg for Facebook).",
   "images": [
-    {"url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/68105c12193bc1140aaa64aac219af70d06a4f81-688x909.png?v=1793645378", "out": "images/preorders/2026-topps-chrome-update-baseball-mega.webp", "height": 560},
-    {"url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/0a5fc3469b7ea902d45bc866791e8b0c759232dc-716x1002.png?v=1793645378", "out": "images/preorders/2026-topps-chrome-update-baseball-value.webp", "height": 560}
+    {
+      "url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/68105c12193bc1140aaa64aac219af70d06a4f81-688x909.png?v=1793645378",
+      "out": "images/preorders/2026-topps-chrome-update-baseball-mega.webp",
+      "height": 560
+    },
+    {
+      "url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/0a5fc3469b7ea902d45bc866791e8b0c759232dc-716x1002.png?v=1793645378",
+      "out": "images/preorders/2026-topps-chrome-update-baseball-value.webp",
+      "height": 560
+    },
+    {
+      "url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/68105c12193bc1140aaa64aac219af70d06a4f81-688x909.png?v=1793645378",
+      "out": "images/preorders/fb-2026-topps-chrome-update-baseball-mega.jpg"
+    },
+    {
+      "url": "https://cdn.shopify.com/s/files/1/0662/9749/5709/files/0a5fc3469b7ea902d45bc866791e8b0c759232dc-716x1002.png?v=1793645378",
+      "out": "images/preorders/fb-2026-topps-chrome-update-baseball-value.jpg"
+    }
   ]
 }
