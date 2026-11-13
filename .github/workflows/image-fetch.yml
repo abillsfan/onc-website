@@ -1,0 +1,53 @@
+name: Fetch site images
+
+# Downloads the images listed in data/image-fetch.json (product photos from Topps etc.),
+# resizes them, and commits any that aren't in the repo yet. Hostinger then deploys them.
+on:
+  push:
+    branches: [main]
+    paths: [data/image-fetch.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - run: pip install --quiet pillow
+      - name: Download and resize
+        run: |
+          python3 - <<'PY'
+          import io, json, os, urllib.request
+          from PIL import Image
+          for e in json.load(open("data/image-fetch.json"))["images"]:
+              out = e["out"]
+              if os.path.exists(out):
+                  continue
+              req = urllib.request.Request(e["url"], headers={"User-Agent": "Mozilla/5.0"})
+              im = Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=30).read()))
+              im = im.convert("RGBA")
+              bg = Image.new("RGBA", im.size, (255, 255, 255, 255))
+              im = Image.alpha_composite(bg, im).convert("RGB")
+              h = e.get("height")
+              if h:
+                  im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
+              os.makedirs(os.path.dirname(out), exist_ok=True)
+              if out.endswith(".webp"):
+                  im.save(out, "WEBP", quality=82, method=6)
+              else:
+                  im.save(out, "JPEG", quality=88, optimize=True)
+              print(f"saved {out} {im.size}")
+          PY
+      - name: Commit
+        run: |
+          git add images
+          git diff --cached --quiet && { echo "Nothing new"; exit 0; }
+          git config user.name "onc-image-fetch"
+          git config user.email "actions@users.noreply.github.com"
+          git commit -m "Fetch site images"
+          for i in 1 2 3; do git pull --rebase -q origin main && git push origin HEAD:main && exit 0; sleep 10; done
+          exit 1
