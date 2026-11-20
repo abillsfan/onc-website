@@ -65,18 +65,18 @@
       "since": "2026-11-10T12:01:33Z"
     },
     {
-      "ebay_id": "327453362033",
+      "ebay_id": "327465652884",
       "wn_product": "659299180",
       "wn_variant": "df355505-ede1-460b-9af1-56225bc54ae4",
       "title": "2026 Bowman Chrome Christian Zazueta 1st Black Auto /10 Dodgers CPA-CZ",
       "state": "active",
-      "since": "2026-11-13T00:38:52Z",
-      "previous_ebay_id": "327442131447"
+      "since": "2026-11-20T00:39:05Z",
+      "previous_ebay_id": "327453362033"
     }
   ],
   "last_product_scan": "2026-11-14T19:08:04Z",
-  "last_order_check": "2026-11-20T00:17:50Z",
-  "last_run": "2026-11-20T00:17:50Z",
+  "last_order_check": "2026-11-20T00:39:05Z",
+  "last_run": "2026-11-20T00:39:05Z",
   "not_crosslisted": {
     "327426245178": "already has bids",
     "327434138954": "no Buy It Now price"
