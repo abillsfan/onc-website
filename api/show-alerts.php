@@ -1,7 +1,7 @@
 <?php
 /* =========================================================
    Automatic show-alert emails.
-   The Cloudflare hook (cloudflare/worker.js) calls this every 5 min on weekends and hourly noon-11 PM CT on weekdays. Each call:
+   The Cloudflare hook (cloudflare/worker.js) calls this every 5 min on Sat/Sun mornings (show time) and hourly noon-11 PM CT. Each call:
      1. asks Whatnot for ONC's scheduled and live shows
      2. a show we haven't seen scheduled  -> "New show" email to the list
         a show we haven't seen live       -> "We're LIVE" email to the list
