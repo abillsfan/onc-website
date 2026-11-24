@@ -287,3 +287,166 @@ var ONC_LINKS = {
       });
   }
 })();
+
+/* =========================================================
+   Forms: show alerts (/api/subscribe.php) + sell your cards (/api/sell.php)
+   Without JavaScript the forms still post normally and the server shows a result page.
+   ========================================================= */
+(function () {
+  var forms = document.querySelectorAll("form.js-onc-form");
+  if (!forms.length || !window.fetch || !window.FormData) return;
+
+  var MAX_PHOTOS = 10;
+
+  // Shrink phone photos before upload: max 2000px JPEG. Faster on cell data, strips location data.
+  var shrink = function (file) {
+    return new Promise(function (resolve) {
+      if (!/^image\/(jpeg|png|webp)$/.test(file.type) || !window.URL || !document.createElement("canvas").toBlob) return resolve(file);
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var max = 2000, w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement("canvas");
+        c.width = Math.round(w * s); c.height = Math.round(h * s);
+        var ctx = c.getContext("2d");
+        ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        c.toBlob(function (b) {
+          if (!b || b.size >= file.size && s === 1 && file.type === "image/jpeg") return resolve(file);
+          resolve(new File([b], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
+        }, "image/jpeg", 0.85);
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
+  forms.forEach(function (form) {
+    var status = form.querySelector(".form-status");
+    var btn = form.querySelector("button[type=submit]");
+    var btnText = btn ? btn.innerHTML : "";
+    var t = form.querySelector("input[name=t]");
+    if (t) t.value = String(Date.now());
+
+    var say = function (msg, kind) {
+      if (!status) return;
+      status.textContent = msg || "";
+      status.className = "form-status" + (kind ? " " + kind : "");
+    };
+    var mark = function (name) {
+      form.querySelectorAll(".invalid").forEach(function (n) { n.classList.remove("invalid"); });
+      if (!name) return;
+      var el = form.querySelector('[name="' + name + '"], [name="' + name + '[]"]');
+      if (!el) return;
+      var target = el.closest(".chips") || el.closest(".consent") || el;
+      target.classList.add("invalid");
+      if (el.focus) el.focus({ preventScroll: false });
+    };
+
+    // Texts need the consent box; email-only does not
+    var phone = form.querySelector("input[name=phone]");
+    var sms = form.querySelector("input[name=sms_ok]");
+    var email = form.querySelector("input[name=email]");
+    var syncContact = function () {
+      if (sms && phone) sms.required = phone.value.trim() !== "";
+      if (email && phone && form.hasAttribute("data-email-or-phone")) email.required = phone.value.trim() === "";
+    };
+    if (phone) { phone.addEventListener("input", syncContact); syncContact(); }
+
+    // Photos: pick, drop, preview, remove
+    var picked = [];
+    var fileInput = form.querySelector("input[type=file]");
+    var drop = form.querySelector(".drop");
+    var thumbs = form.querySelector(".thumbs");
+    var drawThumbs = function () {
+      if (!thumbs) return;
+      thumbs.innerHTML = "";
+      picked.forEach(function (f, i) {
+        var d = document.createElement("div");
+        d.className = "thumb";
+        var im = document.createElement("img");
+        im.alt = f.name;
+        try { im.src = URL.createObjectURL(f); } catch (e) {}
+        var x = document.createElement("button");
+        x.type = "button"; x.setAttribute("aria-label", "Remove " + f.name); x.textContent = "×";
+        x.addEventListener("click", function () { picked.splice(i, 1); drawThumbs(); });
+        d.appendChild(im); d.appendChild(x); thumbs.appendChild(d);
+      });
+      if (drop) {
+        var s = drop.querySelector("small");
+        if (s) s.textContent = picked.length ? picked.length + " of " + MAX_PHOTOS + " photos added. Tap to add more." : "Up to " + MAX_PHOTOS + " photos. Fronts and backs of the best cards help most.";
+      }
+    };
+    var addFiles = function (list) {
+      Array.prototype.forEach.call(list || [], function (f) {
+        if (!/^image\//.test(f.type) && !/\.(heic|heif)$/i.test(f.name)) return;
+        if (picked.length < MAX_PHOTOS) picked.push(f);
+      });
+      if ((list || []).length && picked.length >= MAX_PHOTOS) say("That's the max of " + MAX_PHOTOS + " photos. Email more to info@on-cards.com after you send this.", "work");
+      drawThumbs();
+    };
+    if (fileInput) {
+      fileInput.addEventListener("change", function () { addFiles(fileInput.files); fileInput.value = ""; });
+    }
+    if (drop && fileInput) {
+      ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("over"); }); });
+      ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("over"); }); });
+      drop.addEventListener("drop", function (e) { if (e.dataTransfer) addFiles(e.dataTransfer.files); });
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      mark(null); say("");
+      syncContact();
+      // Chip groups marked data-required need at least one pick
+      var missing = null;
+      form.querySelectorAll(".chips[data-required]").forEach(function (g) {
+        if (!missing && !g.querySelector("input:checked")) missing = g;
+      });
+      if (!form.checkValidity()) { form.reportValidity(); return; }
+      if (missing) {
+        missing.classList.add("invalid");
+        say(missing.getAttribute("data-required"), "err");
+        missing.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      var fd = new FormData(form);
+      if (fileInput) fd.delete(fileInput.name);
+      if (btn) { btn.disabled = true; btn.innerHTML = "<span>Sending…</span>"; }
+      say(picked.length ? "Getting your photos ready…" : "", picked.length ? "work" : "");
+
+      Promise.all(picked.map(shrink)).then(function (files) {
+        files.forEach(function (f) { fd.append(fileInput.name, f, f.name); });
+        if (files.length) say("Sending your cards… (photos can take a minute on cell data)", "work");
+        return fetch(form.action, { method: "POST", body: fd, headers: { "X-Requested-With": "fetch", "Accept": "application/json" } });
+      }).then(function (r) {
+        return r.json().catch(function () {
+          return { ok: false, message: r.status === 413 ? "Those photos are too big to send at once. Try fewer photos." : "Something went wrong. Please try again, or email info@on-cards.com." };
+        });
+      }).then(function (res) {
+        if (res && res.ok) {
+          var done = document.createElement("div");
+          done.className = "form-done";
+          done.setAttribute("role", "status");
+          var h = document.createElement("h3");
+          h.innerHTML = form.getAttribute("data-done-title") || "You're <span>in.</span>";
+          var p = document.createElement("p");
+          p.textContent = res.message;
+          done.appendChild(h); done.appendChild(p);
+          form.innerHTML = "";
+          form.appendChild(done);
+          done.scrollIntoView({ behavior: "smooth", block: "center" });
+        } else {
+          say((res && res.message) || "Something went wrong. Please try again.", "err");
+          mark(res && res.field);
+          if (btn) { btn.disabled = false; btn.innerHTML = btnText; }
+        }
+      }).catch(function () {
+        say("Couldn't reach the website. Check your connection and try again.", "err");
+        if (btn) { btn.disabled = false; btn.innerHTML = btnText; }
+      });
+    });
+  });
+})();

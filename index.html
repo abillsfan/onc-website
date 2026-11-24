@@ -26,7 +26,7 @@
   <link rel="preload" href="assets/fonts/permanent-marker.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/barlow-700.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="assets/style.css?v=20261019img">
+  <link rel="stylesheet" href="assets/style.css?v=20261123forms">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Organization","name":"Outta Nowhere Cards","alternateName":"ONC",
    "url":"https://on-cards.com/","logo":"https://on-cards.com/images/logo.png",
@@ -54,6 +54,7 @@
         <a href="#breaks">Breaks</a>
         <a href="#join">How to Join</a>
         <a href="#faq">FAQ</a>
+        <a href="/sell-your-cards/">Sell Cards</a>
         <a class="btn btn-whatnot btn-sm js-whatnot" href="https://www.whatnot.com/user/outta_nowhere_cards" target="_blank" rel="noopener">Watch Live</a>
       </nav>
     </div>
@@ -94,6 +95,7 @@
             Follow on Facebook
           </a>
         </div>
+        <p class="hero-alerts"><a href="#alerts">Get a text or email before every show &rarr;</a></p>
       </div>
     </section>
 
@@ -121,7 +123,7 @@
           <article class="break-card highlight ondeck-tbd" hidden>
             <div class="tag">Next week</div>
             <h3>Stay tuned for next week's break lineup</h3>
-            <p>This week's show is in the books. Next week's lineup drops soon, so follow <strong>outta_nowhere_cards</strong> on Whatnot, turn on alerts, and follow the Facebook page to see it first.</p>
+            <p>This week's show is in the books. Next week's lineup drops soon. <a href="#alerts">Get show alerts</a> by email or text, follow <strong>outta_nowhere_cards</strong> on Whatnot, and follow the Facebook page to see it first.</p>
           </article>
           <!--
             SINGLES CARD: only for a singles show. Set data-until to when that show ends
@@ -136,6 +138,59 @@
             <p>Can't make a show? ONC singles are also listed on eBay. <a href="#ebay">See what's up for bid</a>.</p>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- ===================== SHOW ALERTS (signup → /api/subscribe.php) ===================== -->
+    <section class="alerts" id="alerts">
+      <div class="wrap">
+        <h2 class="section-title"><span>Get show</span> alerts</h2>
+        <p class="section-sub">Shows drop outta nowhere. Get a heads-up by email or text before we go live on Whatnot, so you never miss a spot in the break you want.</p>
+        <ul class="alert-perks">
+          <li>Alert before every show</li>
+          <li>Break lineups first</li>
+          <li>Big hits recap</li>
+        </ul>
+        <form class="onc-form slim js-onc-form" action="/api/subscribe.php" method="post" data-email-or-phone data-done-title="You're <span>on the list.</span>" novalidate>
+          <input type="hidden" name="source" value="home">
+          <input type="hidden" name="back" value="/#alerts">
+          <input type="hidden" name="t" value="">
+          <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="form-grid three">
+            <div class="field">
+              <label for="al-first">First name <span class="opt">(optional)</span></label>
+              <input id="al-first" type="text" name="first_name" maxlength="40" autocomplete="given-name" placeholder="First name">
+            </div>
+            <div class="field">
+              <label for="al-email">Email</label>
+              <input id="al-email" type="email" name="email" maxlength="120" autocomplete="email" inputmode="email" placeholder="you@email.com">
+            </div>
+            <div class="field">
+              <label for="al-phone">Mobile for texts <span class="opt">(optional)</span></label>
+              <input id="al-phone" type="tel" name="phone" maxlength="20" autocomplete="tel-national" inputmode="tel" placeholder="(662) 555-1234">
+            </div>
+            <fieldset class="full">
+              <legend>What do you collect? <span class="opt">(optional)</span></legend>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" name="interests[]" value="Football"><span>Football</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Baseball"><span>Baseball</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Basketball"><span>Basketball</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Hockey"><span>Hockey</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Pokemon"><span>Pokémon</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Other"><span>Other</span></label>
+              </div>
+            </fieldset>
+            <label class="consent full">
+              <input type="checkbox" name="sms_ok" value="1">
+              <span>Yes, text me Outta Nowhere Cards show alerts at this number. About 1–4 msgs/week. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a>.</span>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-whatnot btn-lg" type="submit"><span>Get show alerts</span></button>
+            <p class="form-fine">Email, text, or both. No spam, and we never sell your info. Unsubscribe anytime.</p>
+          </div>
+          <p class="form-status" role="alert" aria-live="polite"></p>
+        </form>
       </div>
     </section>
 
@@ -621,7 +676,8 @@
       <nav class="footer-links" aria-label="More pages">
         <a href="/hits/">Hits</a> · <a href="/card-breaks/">What is a card break?</a> · <a href="/break-rules/">Break rules &amp; FAQ</a> ·
         <a href="/team-breaks/">Team breaks</a> · <a href="/random-breaks/">Random breaks</a> ·
-        <a href="/what-we-break/">What we break</a> · <a href="/release-calendar/">Release calendar</a>
+        <a href="/what-we-break/">What we break</a> · <a href="/release-calendar/">Release calendar</a> ·
+        <a href="/#alerts">Show alerts</a> · <a href="/sell-your-cards/">Sell your cards</a> · <a href="/privacy/">Privacy</a>
       </nav>
       <div class="fine">
         &copy; <span id="year">2026</span> Outta Nowhere Cards. All rights reserved.<br>
@@ -630,7 +686,7 @@
     </div>
   </footer>
 
-  <script src="assets/main.js?v=20261029val"></script>
+  <script src="assets/main.js?v=20261123forms"></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ab98733ee9a4402b9d5c901fd85cb67b"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

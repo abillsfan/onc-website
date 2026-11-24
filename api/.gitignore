@@ -1,0 +1,2 @@
+# Fallback storage for form submissions (only used if the folder above public_html isn't writable)
+.private/
