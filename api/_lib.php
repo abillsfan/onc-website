@@ -71,7 +71,7 @@ function onc_respond(bool $ok, string $msg, string $back, int $code = 200, array
   $b = htmlspecialchars($back, ENT_QUOTES);
   echo "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">"
      . "<meta name=\"robots\" content=\"noindex\"><title>$title | Outta Nowhere Cards</title>"
-     . "<link rel=\"stylesheet\" href=\"/assets/style.css?v=20261123forms\"></head>"
+     . "<link rel=\"stylesheet\" href=\"/assets/style.css?v=20261123rc\"></head>"
      . "<body><main class=\"final\" style=\"min-height:100vh;display:grid;place-items:center\"><div class=\"wrap narrow\" style=\"text-align:center\">"
      . "<h1 class=\"slash\">" . ($ok ? 'You\'re <span>in.</span>' : 'Hold <span>up.</span>') . "</h1><p class=\"lede\">$m</p>"
      . "<div class=\"btn-row center\"><a class=\"btn btn-blue btn-lg\" href=\"$b\"><span>" . ($ok ? 'Back to On-Cards.com' : 'Go back and fix it') . "</span></a></div>"
