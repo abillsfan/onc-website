@@ -2,7 +2,7 @@
 //  * POST /whatnot  - Whatnot webhooks (orders.created etc.)      -> start the sync right away
 //  * POST /ebay     - eBay Platform Notifications (sold, bid, new listing) -> start the sync right away
 //  * every 2 hours (cron trigger)                                  -> start the sync (backup; alerts if it finds a miss)
-//  * every 5 min on weekends / 30 min on weekdays (cron triggers)    -> poke On-Cards.com show alerts (api/show-alerts.php),
+//  * every 5 min on weekends, hourly noon-11 PM CT (cron triggers)   -> poke On-Cards.com show alerts (api/show-alerts.php),
 //    which emails the list when a Whatnot show is scheduled or goes live
 // A poke only STARTS the sync; the sync itself reads both sites' real data, so a fake poke can't
 // change anything. Pokes are throttled to one per 10 seconds; GitHub queues at most one run behind

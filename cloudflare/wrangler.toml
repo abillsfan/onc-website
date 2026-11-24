@@ -5,6 +5,7 @@ workers_dev = true
 
 [triggers]
 # every 2 hours: cross-list sync backup
-# show-alert emails (api/show-alerts.php): every 5 min on Sat/Sun (UTC, so Fri 6 PM - Sun 6 PM CT),
-# every 30 min the rest of the week
-crons = ["17 */2 * * *", "*/5 * * * SAT,SUN", "*/30 * * * *"]
+# show-alert emails (api/show-alerts.php), Carl goes live weekends and sometimes weekday evenings:
+#   every 5 min on Sat/Sun (UTC days = Fri 6 PM to Sun 6 PM Central)
+#   once an hour, noon to 11 PM Central, every day (UTC hours 18-23 and 0-5; an hour later on the clock during daylight time)
+crons = ["17 */2 * * *", "*/5 * * * SAT,SUN", "7 0-5,18-23 * * *"]
