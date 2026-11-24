@@ -6,6 +6,11 @@ name: Deploy instant-sync hook (Cloudflare)
 # as its own secret so it can start the cross-list sync.
 on:
   workflow_dispatch:
+  # also redeploy automatically when the hook itself changes
+  push:
+    branches: [main]
+    paths:
+      - "cloudflare/**"
 
 permissions:
   contents: read

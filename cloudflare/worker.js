@@ -2,11 +2,15 @@
 //  * POST /whatnot  - Whatnot webhooks (orders.created etc.)      -> start the sync right away
 //  * POST /ebay     - eBay Platform Notifications (sold, bid, new listing) -> start the sync right away
 //  * every 2 hours (cron trigger)                                  -> start the sync (backup; alerts if it finds a miss)
+//  * every minute (cron trigger)                                   -> poke On-Cards.com show alerts (api/show-alerts.php),
+//    which emails the list when a Whatnot show is scheduled or goes live
 // A poke only STARTS the sync; the sync itself reads both sites' real data, so a fake poke can't
 // change anything. Pokes are throttled to one per 10 seconds; GitHub queues at most one run behind
 // the current one, so bursts collapse and the sync stays well inside eBay's daily API limit.
 const WORKFLOW = "https://api.github.com/repos/abillsfan/onc-website/actions/workflows/crosslist-sync.yml/dispatches";
 const THROTTLE_SECONDS = 10; // a run started this recently will still read the newer data
+const SHOW_ALERTS = "https://on-cards.com/api/show-alerts.php";
+const EVERY_MINUTE = "* * * * *";
 
 async function startSync(env, why, force) {
   const cache = caches.default;
@@ -42,6 +46,14 @@ export default {
     return new Response("ok"); // both senders only need a quick 200
   },
   async scheduled(event, env, ctx) {
+    if (event.cron === EVERY_MINUTE) {
+      ctx.waitUntil(
+        fetch(SHOW_ALERTS, { method: "POST", headers: { "User-Agent": "onc-crosslist-hook" } })
+          .then(async (r) => console.log("show alerts", r.status, (await r.text()).slice(0, 200)))
+          .catch((e) => console.log("show alerts failed", String(e)))
+      );
+      return;
+    }
     ctx.waitUntil(startSync(env, "timer", true));
   },
 };

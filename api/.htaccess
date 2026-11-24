@@ -1,6 +1,6 @@
 # Form endpoints only. The helper file and private fallback folder are never served.
 Options -Indexes
-<FilesMatch "^(_lib\.php|.*\.(csv|json|log))$">
+<FilesMatch "^(_lib\.php|.*\.(csv|json|log|pem|key|txt|tmp))$">
   <IfModule mod_authz_core.c>
     Require all denied
   </IfModule>

@@ -217,9 +217,9 @@ function onc_header_safe(string $s): string {
  * Send a plain-text email, optionally with attachments [['name'=>..,'type'=>..,'data'=>..], ...].
  * Returns true if PHP handed it to the mail server.
  */
-function onc_mail(string $to, string $subject, string $body, string $replyTo = '', array $attachments = []): bool {
+function onc_mail(string $to, string $subject, string $body, string $replyTo = '', array $attachments = [], array $extraHeaders = []): bool {
   $subjectEnc = mb_encode_mimeheader(onc_header_safe($subject), 'UTF-8', 'B', "\r\n");
-  $headers = [];
+  $headers = array_map('onc_header_safe', $extraHeaders);
   $headers[] = 'From: ' . mb_encode_mimeheader(ONC_FROM_NAME, 'UTF-8', 'Q') . ' <' . ONC_FROM . '>';
   if ($replyTo !== '' && filter_var($replyTo, FILTER_VALIDATE_EMAIL)) $headers[] = 'Reply-To: ' . onc_header_safe($replyTo);
   $headers[] = 'MIME-Version: 1.0';
@@ -246,4 +246,118 @@ function onc_mail(string $to, string $subject, string $body, string $replyTo = '
 function onc_log(string $line): void {
   $dir = onc_private_dir();
   if ($dir !== '') @file_put_contents("$dir/forms.log", date('Y-m-d H:i:s') . "  $line\n", FILE_APPEND | LOCK_EX);
+}
+
+/* ---------- email list (show alerts) ---------- */
+const ONC_MAIL_FOOTER_ADDRESS = 'Outta Nowhere Cards · Hernando, MS'; // add a mailing address or PO box here
+
+/** Random key kept only on the server (for unsubscribe links). */
+function onc_server_secret(): string {
+  $dir = onc_private_dir();
+  if ($dir === '') return 'onc-fallback';
+  $f = "$dir/server-secret.key";
+  if (!is_readable($f)) { @file_put_contents($f, bin2hex(random_bytes(32)), LOCK_EX); @chmod($f, 0600); }
+  return trim((string)@file_get_contents($f)) ?: 'onc-fallback';
+}
+
+function onc_unsub_token(string $email): string {
+  return substr(hash_hmac('sha256', strtolower($email), onc_server_secret()), 0, 32);
+}
+
+function onc_unsub_link(string $email): string {
+  return ONC_SITE . '/api/unsubscribe.php?e=' . rawurlencode(strtolower($email)) . '&k=' . onc_unsub_token($email);
+}
+
+function onc_unsubscribed(): array {
+  $out = [];
+  foreach (onc_csv_rows('unsubscribed.csv') as $r) $out[strtolower($r['email'] ?? '')] = true;
+  return $out;
+}
+
+/** Everyone who should get show emails: [email => first_name], newest name wins, unsubscribes removed. */
+function onc_alert_recipients(): array {
+  $gone = onc_unsubscribed();
+  $list = [];
+  foreach (onc_csv_rows('subscribers.csv') as $r) {
+    $e = strtolower(trim($r['email'] ?? ''));
+    if ($e === '' || isset($gone[$e]) || ($r['email_alerts'] ?? 'yes') !== 'yes') continue;
+    $list[$e] = ($r['first_name'] ?? '') !== '' ? $r['first_name'] : ($list[$e] ?? '');
+  }
+  return $list;
+}
+
+/** Standard footer for list emails (unsubscribe link + sender). */
+function onc_list_footer(string $email): string {
+  return "\n\n--\nYou're getting this because you signed up for show alerts at on-cards.com.\n"
+       . "Unsubscribe with one click: " . onc_unsub_link($email) . "\n"
+       . ONC_MAIL_FOOTER_ADDRESS . "\n";
+}
+
+/** Headers that give Gmail/Apple Mail their built-in "Unsubscribe" button. */
+function onc_list_headers(string $email): array {
+  $url = onc_unsub_link($email);
+  return ["List-Unsubscribe: <$url>, <mailto:" . ONC_FROM . "?subject=unsubscribe>", 'List-Unsubscribe-Post: List-Unsubscribe=One-Click'];
+}
+
+function onc_unsubscribe(string $email, string $how): bool {
+  $email = strtolower(trim($email));
+  if (isset(onc_unsubscribed()[$email])) return true;
+  return onc_csv_append('unsubscribed.csv', ['unsubscribed', 'email', 'how'], [date('Y-m-d H:i:s'), $email, $how]);
+}
+
+/** Take an address back off the unsubscribed list (they signed up again). */
+function onc_resubscribe(string $email): void {
+  $dir = onc_private_dir();
+  $path = "$dir/unsubscribed.csv";
+  if ($dir === '' || !is_file($path)) return;
+  $keep = array_filter(onc_csv_rows('unsubscribed.csv'), fn($r) => strtolower($r['email'] ?? '') !== strtolower($email));
+  $tmp = "$path.tmp";
+  @unlink($tmp);
+  rename($path, $tmp);
+  foreach ($keep as $r) onc_csv_append('unsubscribed.csv', ['unsubscribed', 'email', 'how'], [$r['unsubscribed'], $r['email'], $r['how']]);
+  if (!$keep) @file_put_contents($path, "\xEF\xBB\xBFunsubscribed,email,how\n");
+  @unlink($tmp);
+}
+
+/* ---------- Whatnot (for automatic show emails) ---------- */
+const ONC_WHATNOT_API = 'https://api.whatnot.com/seller-api/rest/v2';
+const ONC_WHATNOT_USER = 'outta_nowhere_cards';
+
+function onc_whatnot_token(): string {
+  $dir = onc_private_dir();
+  return $dir === '' ? '' : trim((string)@file_get_contents("$dir/whatnot-token.txt"));
+}
+
+/** GET from the Whatnot Seller API. Returns [httpCode, decodedBody|null, errorText]. */
+function onc_whatnot_get(string $path, array $query = [], string $token = ''): array {
+  $token = $token !== '' ? $token : onc_whatnot_token();
+  if ($token === '') return [0, null, 'no Whatnot key saved yet'];
+  $url = (getenv('ONC_WHATNOT_API') ?: ONC_WHATNOT_API) . $path . ($query ? '?' . http_build_query($query) : '');
+  $headers = ["Authorization: Bearer $token", 'Accept: application/json', 'User-Agent: on-cards.com show alerts'];
+  if (function_exists('curl_init')) {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_HTTPHEADER => $headers, CURLOPT_TIMEOUT => 15, CURLOPT_CONNECTTIMEOUT => 8]);
+    $raw = curl_exec($ch);
+    $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err = $raw === false ? curl_error($ch) : '';
+    curl_close($ch);
+  } else {
+    $ctx = stream_context_create(['http' => ['method' => 'GET', 'header' => implode("\r\n", $headers), 'timeout' => 15, 'ignore_errors' => true]]);
+    $raw = @file_get_contents($url, false, $ctx);
+    $code = 0;
+    foreach ($http_response_header ?? [] as $h) if (preg_match('#^HTTP/\S+ (\d{3})#', $h, $m)) $code = (int)$m[1];
+    $err = $raw === false ? 'could not reach Whatnot' : '';
+  }
+  $data = is_string($raw) ? json_decode($raw, true) : null;
+  if ($code < 200 || $code >= 300) {
+    $msg = is_array($data) ? (string)($data['message'] ?? $data['error'] ?? $data['detail'] ?? json_encode($data)) : (string)$raw;
+    return [$code, $data, $err ?: "HTTP $code: " . mb_substr($msg, 0, 200)];
+  }
+  return [$code, $data, ''];
+}
+
+function onc_json_state(string $file): array {
+  $dir = onc_private_dir();
+  $d = $dir === '' ? null : json_decode((string)@file_get_contents("$dir/$file"), true);
+  return is_array($d) ? $d : [];
 }

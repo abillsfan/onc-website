@@ -95,7 +95,7 @@
             Follow on Facebook
           </a>
         </div>
-        <p class="hero-alerts"><a href="#alerts">Get a text or email before every show &rarr;</a></p>
+        <p class="hero-alerts"><a href="#alerts">Get an email when we schedule a show and when we go live &rarr;</a></p>
       </div>
     </section>
 
@@ -123,7 +123,7 @@
           <article class="break-card highlight ondeck-tbd" hidden>
             <div class="tag">Next week</div>
             <h3>Stay tuned for next week's break lineup</h3>
-            <p>This week's show is in the books. Next week's lineup drops soon. <a href="#alerts">Get show alerts</a> by email or text, follow <strong>outta_nowhere_cards</strong> on Whatnot, and follow the Facebook page to see it first.</p>
+            <p>This week's show is in the books. Next week's lineup drops soon. <a href="#alerts">Get show alerts</a> by email, follow <strong>outta_nowhere_cards</strong> on Whatnot, and follow the Facebook page to see it first.</p>
           </article>
           <!--
             SINGLES CARD: only for a singles show. Set data-until to when that show ends
@@ -145,29 +145,25 @@
     <section class="alerts" id="alerts">
       <div class="wrap">
         <h2 class="section-title"><span>Get show</span> alerts</h2>
-        <p class="section-sub">Shows drop outta nowhere. Get a heads-up by email or text before we go live on Whatnot, so you never miss a spot in the break you want.</p>
+        <p class="section-sub">Shows drop outta nowhere. Get an email the moment we schedule a show and again when we go live on Whatnot, so you never miss a spot in the break you want.</p>
         <ul class="alert-perks">
-          <li>Alert before every show</li>
-          <li>Break lineups first</li>
-          <li>Big hits recap</li>
+          <li>Email when a show is scheduled</li>
+          <li>Email the second we go live</li>
+          <li>No spam, ever</li>
         </ul>
-        <form class="onc-form slim js-onc-form" action="/api/subscribe.php" method="post" data-email-or-phone data-done-title="You're <span>on the list.</span>" novalidate>
+        <form class="onc-form slim js-onc-form" action="/api/subscribe.php" method="post" data-done-title="You're <span>on the list.</span>" novalidate>
           <input type="hidden" name="source" value="home">
           <input type="hidden" name="back" value="/#alerts">
           <input type="hidden" name="t" value="">
           <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
-          <div class="form-grid three">
+          <div class="form-grid">
             <div class="field">
               <label for="al-first">First name <span class="opt">(optional)</span></label>
               <input id="al-first" type="text" name="first_name" maxlength="40" autocomplete="given-name" placeholder="First name">
             </div>
             <div class="field">
               <label for="al-email">Email</label>
-              <input id="al-email" type="email" name="email" maxlength="120" autocomplete="email" inputmode="email" placeholder="you@email.com">
-            </div>
-            <div class="field">
-              <label for="al-phone">Mobile for texts <span class="opt">(optional)</span></label>
-              <input id="al-phone" type="tel" name="phone" maxlength="20" autocomplete="tel-national" inputmode="tel" placeholder="(662) 555-1234">
+              <input id="al-email" type="email" name="email" maxlength="120" autocomplete="email" inputmode="email" placeholder="you@email.com" required>
             </div>
             <fieldset class="full">
               <legend>What do you collect? <span class="opt">(optional)</span></legend>
@@ -180,14 +176,10 @@
                 <label class="chip"><input type="checkbox" name="interests[]" value="Other"><span>Other</span></label>
               </div>
             </fieldset>
-            <label class="consent full">
-              <input type="checkbox" name="sms_ok" value="1">
-              <span>Yes, text me Outta Nowhere Cards show alerts at this number. About 1–4 msgs/week. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help. Consent is not a condition of purchase. See our <a href="/privacy/">Privacy Policy</a>.</span>
-            </label>
           </div>
           <div class="form-actions">
             <button class="btn btn-whatnot btn-lg" type="submit"><span>Get show alerts</span></button>
-            <p class="form-fine">Email, text, or both. No spam, and we never sell your info. Unsubscribe anytime.</p>
+            <p class="form-fine">Only show alerts. We never sell your info, and every email has a one-click unsubscribe. <a href="/privacy/">Privacy Policy</a></p>
           </div>
           <p class="form-status" role="alert" aria-live="polite"></p>
         </form>

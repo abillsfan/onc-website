@@ -4,4 +4,5 @@ compatibility_date = "2026-10-01"
 workers_dev = true
 
 [triggers]
-crons = ["17 */2 * * *"]
+# every 2 hours: cross-list sync backup; every minute: show-alert emails (api/show-alerts.php)
+crons = ["17 */2 * * *", "* * * * *"]

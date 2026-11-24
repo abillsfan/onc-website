@@ -1,0 +1,79 @@
+name: "Show alerts: hand Whatnot key to website"
+
+# The automatic show-alert emails (api/show-alerts.php on On-Cards.com) need to read ONC's Whatnot shows.
+# This repo is public, so the key can't be stored in it. Instead this workflow takes the existing
+# WHATNOT_API_TOKEN secret, locks it with the website's public key (only the website can unlock it),
+# and sends it over. The website checks it belongs to outta_nowhere_cards before saving it.
+# Runs when the alert code changes, every Monday (in case the key was replaced), or by hand.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - ".github/workflows/alert-token.yml"
+  schedule:
+    - cron: "41 14 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  hand-over:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check secret
+        env:
+          WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
+        run: '[ -n "$WHATNOT_API_TOKEN" ] || { echo "::error::Missing secret WHATNOT_API_TOKEN"; exit 1; }'
+      - run: pip install --quiet cryptography
+      - name: Lock the key and send it to On-Cards.com
+        env:
+          WHATNOT_API_TOKEN: ${{ secrets.WHATNOT_API_TOKEN }}
+        shell: python
+        run: |
+          import base64, json, os, sys, time, urllib.request, urllib.error
+          from cryptography.hazmat.primitives import hashes, serialization
+          from cryptography.hazmat.primitives.asymmetric import padding
+          from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+          URL = "https://on-cards.com/api/alert-token.php"
+          UA = {"User-Agent": "onc-alert-token (github actions)", "Accept": "application/json"}
+          summary = open(os.environ["GITHUB_STEP_SUMMARY"], "a")
+
+          # Hostinger deploys a minute or two after the push; wait for the endpoint to exist
+          pub = None
+          for i in range(40):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(URL, headers=UA), timeout=20) as r:
+                      pub = json.load(r).get("public_key")
+                      if pub: break
+              except Exception as e:
+                  print(f"waiting for the website ({e})")
+              time.sleep(20)
+          if not pub:
+              print("::error::Couldn't get the website's public key from " + URL); sys.exit(1)
+
+          key = serialization.load_pem_public_key(pub.encode())
+          aes = AESGCM.generate_key(bit_length=256)
+          iv = os.urandom(12)
+          sealed = AESGCM(aes).encrypt(iv, os.environ["WHATNOT_API_TOKEN"].strip().encode(), None)
+          body = {
+              "key": base64.b64encode(key.encrypt(aes, padding.OAEP(mgf=padding.MGF1(hashes.SHA1()), algorithm=hashes.SHA1(), label=None))).decode(),
+              "iv": base64.b64encode(iv).decode(),
+              "data": base64.b64encode(sealed[:-16]).decode(),
+              "tag": base64.b64encode(sealed[-16:]).decode(),
+          }
+          req = urllib.request.Request(URL, data=json.dumps(body).encode(), method="POST",
+                                       headers={**UA, "Content-Type": "application/json"})
+          try:
+              with urllib.request.urlopen(req, timeout=40) as r:
+                  res = json.load(r)
+          except urllib.error.HTTPError as e:
+              try: res = json.load(e)
+              except Exception: res = {"ok": False, "error": f"HTTP {e.code}"}
+          print(json.dumps(res, indent=2))
+          summary.write("### Show alerts: Whatnot key hand-off\n\n```\n" + json.dumps(res, indent=2) + "\n```\n")
+          if not res.get("ok"):
+              print("::error::" + str(res.get("error"))); sys.exit(1)
