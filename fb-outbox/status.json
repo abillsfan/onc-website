@@ -1,0 +1,5 @@
+{
+ "checked_at": "2026-11-24T03:44:45+00:00",
+ "ok": false,
+ "error": "FB_PAGE_TOKEN secret is missing"
+}
