@@ -450,3 +450,22 @@ var ONC_LINKS = {
     });
   });
 })();
+
+/* Logo / brand name: on the homepage, jump all the way back to the top (the header is sticky,
+   so a plain #top link didn't move the page). On other pages it goes to the homepage as normal. */
+(function () {
+  var brand = document.querySelector(".nav .brand");
+  if (!brand) return;
+  brand.addEventListener("click", function (e) {
+    var home = location.pathname === "/" || location.pathname === "/index.html";
+    if (!home || e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+    e.preventDefault();
+    var links = document.querySelector(".nav-links"), toggle = document.querySelector(".nav-toggle");
+    if (links && links.classList.contains("open")) {
+      links.classList.remove("open");
+      if (toggle) { toggle.classList.remove("open"); toggle.setAttribute("aria-expanded", "false"); }
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (location.hash && history.replaceState) history.replaceState(null, "", location.pathname + location.search);
+  });
+})();
