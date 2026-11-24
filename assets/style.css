@@ -558,3 +558,17 @@ html{scroll-padding-top:120px}
 .rc-jump a{color:var(--blue-hi);text-decoration:none;white-space:nowrap}
 .rc-week h3{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:20px;letter-spacing:.02em;color:var(--muted);margin:26px 0 8px}
 .rc-week h2{scroll-margin-top:90px}
+/* blog */
+.post-meta{font-size:14px;font-weight:600;color:var(--muted);margin:0 0 8px;letter-spacing:.02em}
+.post-title{font-size:clamp(32px,5vw,52px)}
+.post-body{font-size:18px}
+.post-body p,.post-body li{line-height:1.7}
+.post-body h2{margin-top:34px}
+.post-next{margin:34px 0 0;padding:16px 20px;border-left:4px solid var(--wn-yellow);background:rgba(255,230,0,.06);border-radius:8px}
+.post-next p{margin:0}
+.post-list{display:grid;gap:18px}
+.post-card h2,.post-card h3{font-family:var(--display);text-transform:uppercase;font-style:italic;font-weight:400;font-size:24px;line-height:1.15;margin:0 0 8px}
+.post-card h2 a,.post-card h3 a{color:var(--white);text-decoration:none}
+.post-card h2 a:hover,.post-card h3 a:hover{color:var(--blue-hi)}
+.home-blog{padding:84px 0}
+@media (max-width:620px){.home-blog{padding:60px 0}.post-body{font-size:17px}}
