@@ -572,3 +572,7 @@ html{scroll-padding-top:120px}
 .post-card h2 a:hover,.post-card h3 a:hover{color:var(--blue-hi)}
 .home-blog{padding:84px 0}
 @media (max-width:620px){.home-blog{padding:60px 0}.post-body{font-size:17px}}
+.post-card{display:flex;flex-direction:column}
+.post-card p{flex:1}
+.post-card .post-read{align-self:flex-start;margin-top:16px}
+.home-blog .break-grid{grid-template-columns:repeat(auto-fit,minmax(280px,370px));justify-content:center}
