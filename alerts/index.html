@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Get Show Alerts | Outta Nowhere Cards</title>
+  <meta name="description" content="Get an email when Outta Nowhere Cards schedules a new Whatnot show and the second we go live. Card breaks, singles and big hits. No spam.">
+  <link rel="canonical" href="https://on-cards.com/alerts/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Get Show Alerts | Outta Nowhere Cards">
+  <meta property="og:description" content="Get an email when Outta Nowhere Cards schedules a new Whatnot show and the second we go live. Card breaks, singles and big hits. No spam.">
+  <meta property="og:site_name" content="On-Cards.com">
+  <meta property="og:image" content="https://on-cards.com/images/og-image.jpg">
+  <meta property="og:url" content="https://on-cards.com/alerts/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32.png?v=20261024">
+  <link rel="apple-touch-icon" href="/images/icon-180.png?v=20261024">
+  <link rel="preload" href="/assets/fonts/anton.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/assets/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/style.css?v=20261123navbtn">
+  <script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://on-cards.com/"}, {"@type": "ListItem", "position": 2, "name": "Show alerts", "item": "https://on-cards.com/alerts/"}]}</script>
+</head>
+<body class="subpage">
+  <header class="nav" id="top">
+    <div class="wrap nav-inner">
+      <a href="/" class="brand" aria-label="Outta Nowhere Cards home">
+        <img src="/images/logo-112.png?v=20261024" alt="Outta Nowhere Cards logo" width="56" height="56">
+        <span>Outta Nowhere <em>Cards</em></span>
+      </a>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      <nav class="nav-links" aria-label="Main">
+        <a href="/#ondeck">On Deck</a>
+        <a href="/#ebay">eBay</a>
+        <a href="/hits/">Hits</a>
+        <a href="/release-calendar/">Releases</a>
+        <a href="/card-breaks/">Breaks</a>
+        <a href="/#faq">FAQ</a>
+        <a href="/sell-your-cards/">Sell Cards</a>
+        <a class="btn btn-blue btn-sm nav-alerts" href="/alerts/"><span>Get Alerts</span></a>
+        <a class="btn btn-whatnot btn-sm js-whatnot" href="https://www.whatnot.com/user/outta_nowhere_cards" target="_blank" rel="noopener">Watch Live</a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="page-hero">
+      <div class="wrap narrow">
+        <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a> <span>›</span> <span aria-current="page">Show alerts</span></nav>
+        <h1 class="page-title"><span>Get show</span> alerts</h1>
+        <p class="page-lede">Shows drop outta nowhere. Get an email the moment we schedule a show and again the second we go live on Whatnot, so you never miss a spot in the break you want.</p>
+      </div>
+    </section>
+    <section class="page-body">
+      <div class="wrap">
+        <ul class="alert-perks">
+          <li>Email when a show is scheduled</li>
+          <li>Email the second we go live</li>
+          <li>No spam, ever</li>
+        </ul>
+        <form class="onc-form slim js-onc-form" action="/api/subscribe.php" method="post" data-done-title="You're <span>on the list.</span>" novalidate>
+          <input type="hidden" name="source" value="alerts-page">
+          <input type="hidden" name="back" value="/alerts/">
+          <input type="hidden" name="t" value="">
+          <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+          <div class="form-grid">
+            <div class="field">
+              <label for="ap-first">First name <span class="opt">(optional)</span></label>
+              <input id="ap-first" type="text" name="first_name" maxlength="40" autocomplete="given-name" placeholder="First name">
+            </div>
+            <div class="field">
+              <label for="ap-email">Email</label>
+              <input id="ap-email" type="email" name="email" maxlength="120" autocomplete="email" inputmode="email" placeholder="you@email.com" required>
+            </div>
+            <fieldset class="full">
+              <legend>What do you collect? <span class="opt">(optional)</span></legend>
+              <div class="chips">
+                <label class="chip"><input type="checkbox" name="interests[]" value="Football"><span>Football</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Baseball"><span>Baseball</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Basketball"><span>Basketball</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Hockey"><span>Hockey</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Pokemon"><span>Pokémon</span></label>
+                <label class="chip"><input type="checkbox" name="interests[]" value="Other"><span>Other</span></label>
+              </div>
+            </fieldset>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-whatnot btn-lg" type="submit"><span>Get show alerts</span></button>
+            <p class="form-fine">Only show alerts. We never sell your info, and every email has a one-click unsubscribe. <a href="/privacy/">Privacy Policy</a></p>
+          </div>
+          <p class="form-status" role="alert" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div>
+        <strong>Outta Nowhere Cards</strong> · On-Cards.com<br>
+        <span class="handle">@outta_nowhere_cards</span> on Whatnot &amp; Facebook<br>
+        <a href="mailto:info@on-cards.com">info@on-cards.com</a>
+      </div>
+      <nav class="footer-links" aria-label="More pages">
+        <a href="/">Home</a> · <a href="/hits/">Hits</a> · <a href="/card-breaks/">What is a card break?</a> · <a href="/break-rules/">Break rules &amp; FAQ</a> ·
+        <a href="/team-breaks/">Team breaks</a> · <a href="/random-breaks/">Random breaks</a> ·
+        <a href="/what-we-break/">What we break</a> · <a href="/release-calendar/">Release calendar</a> ·
+        <a href="/alerts/">Show alerts</a> · <a href="/sell-your-cards/">Sell your cards</a> · <a href="/privacy/">Privacy</a>
+      </nav>
+      <div class="fine">
+        &copy; <span id="year">2026</span> Outta Nowhere Cards. All rights reserved.<br>
+        Whatnot and Facebook are trademarks of their respective owners. ONC is an independent seller.
+      </div>
+    </div>
+  </footer>
+  <script src="/assets/main.js?v=20261123forms"></script>
+  <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "ab98733ee9a4402b9d5c901fd85cb67b"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
