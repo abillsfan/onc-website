@@ -1,0 +1,46 @@
+name: Facebook poster (free, no Zapier)
+
+# Posts reels queued in fb-outbox/queue/ to the Outta Nowhere Cards Facebook Page with Facebook's own API,
+# then moves each request to fb-outbox/done/ with the result (video id or error).
+# The reel scheduled tasks queue a post by committing a JSON file to fb-outbox/queue/ (see fb-outbox/README.md).
+# Changing fb-outbox/check.txt only tests the key and writes fb-outbox/status.json.
+# Needs repository secret FB_PAGE_TOKEN (Page access token for the Outta Nowhere Cards Page).
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "fb-outbox/queue/**"
+      - "fb-outbox/check.txt"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fb-post
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check the Facebook key
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 scripts/fb_post.py --check
+      - name: Post queued reels
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+        run: python3 scripts/fb_post.py
+      - name: Save results
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A fb-outbox
+          git diff --cached --quiet && exit 0
+          git commit -m "Facebook poster: results"
+          for i in 1 2 3; do git push && exit 0; git pull --rebase; done
+          exit 1
